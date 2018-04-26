@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.acode.player.MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="250dp">
+
+        <SurfaceView
+            android:id="@+id/sv_player"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:background="#b0000000">
+
+            <Button
+                android:id="@+id/btn_bottom_start_play"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerVertical="true"
+                android:text="S" />
+
+            <TextView
+                android:id="@+id/tv_bottom_curr_time"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/btn_bottom_start_play"
+                android:gravity="center"
+                android:text="0"
+                android:textColor="#fff" />
+
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_toLeftOf="@+id/tv_bottom_end_time"
+                android:layout_toRightOf="@+id/tv_bottom_curr_time"
+                android:indeterminate="false"
+                android:max="100"
+                android:progress="0"
+                android:secondaryProgress="20" />
+
+
+            <TextView
+                android:id="@+id/tv_bottom_end_time"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/btn_bottom_full_screen"
+                android:gravity="center"
+                android:text="0"
+                android:textColor="#fff" />
+
+            <Button
+                android:id="@+id/btn_bottom_full_screen"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:text="F" />
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/btn_start_play"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:text="播放" />
+
+    </RelativeLayout>
+</LinearLayout>
