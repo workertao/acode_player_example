@@ -50,7 +50,7 @@
                 android:indeterminate="false"
                 android:max="100"
                 android:progress="0"
-                android:secondaryProgress="20" />
+                android:secondaryProgress="0" />
 
 
             <TextView

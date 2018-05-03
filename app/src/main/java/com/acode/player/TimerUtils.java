@@ -12,7 +12,7 @@ import java.util.TimerTask;
  * user:yangtao
  * date:2018/4/261227
  * email:yangtao@bjxmail.com
- * introduce:功能
+ * introduce:监听视频播放进度
  */
 public class TimerUtils {
     private Timer timer;
@@ -60,9 +60,10 @@ public class TimerUtils {
             }
             int currentTime = (int) (player.getCurrentPosition() / 1000);
             int currentProgress = (int) (new BigDecimal((float) player.getCurrentPosition() / player.getDuration()).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue() * 100);
+            int secondProgressPer = player.getBufferedPercentage();
             Log.d("post", "当前timer内存地址：" + timer.toString() + "    当前进度：" + currentProgress);
             if (currentProgress < 100) {
-                acodePlayerStateListener.playerRuning(currentTime, currentProgress);
+                acodePlayerStateListener.playerRuning(currentTime, currentProgress,secondProgressPer);
                 return;
             }
             acodePlayerStateListener.playerStop();

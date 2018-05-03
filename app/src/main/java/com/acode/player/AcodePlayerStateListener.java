@@ -8,8 +8,13 @@ package com.acode.player;
  */
 public interface AcodePlayerStateListener {
 
-    //播放中
-    void playerRuning(int currentTime, int currentProgress);
+    /**
+     * 播放中
+     * @param currentTime        当前播放时间
+     * @param currentProgress    当前的进度条
+     * @param secondProgressPer  当前的缓冲进度条
+     */
+    void playerRuning(int currentTime, int currentProgress,int secondProgressPer);
 
     //暂停
     void playerStop();

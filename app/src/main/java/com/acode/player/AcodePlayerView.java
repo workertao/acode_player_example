@@ -57,6 +57,8 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     private final String CURRENT_TIME = "CURRENT_TIME";
     //更新当前进度条
     private final String CURRENT_PROGRESS = "CURRENT_PROGRESS";
+    //更新当前缓冲进度条
+    private final String SECOND_PROGRESS = "SECOND_PROGRESS";
     private Context context;
     //视频中间的播放按钮
     private Button btn_start_play;
@@ -193,12 +195,16 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
 
     //初始化播放器
     private void initPlayer() {
-        //更新界面ui
+        //初始化界面UI
+        //当前的播放时间
         tv_bottom_curr_time.setText("0");
+        //当前食品的总时长
         tv_bottom_end_time.setText(String.valueOf(player.getDuration() / 1000));
-        //进度条和当前时间的监听
-//        progressManage();
-//        //监听进度条
+        //当前进度条
+        seekBar.setProgress(0);
+        //当前缓冲进度条
+        seekBar.setSecondaryProgress(0);
+        //监听进度条
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -218,7 +224,7 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     }
 
     @Override
-    public void playerRuning(int currentTime, int currentProgress) {
+    public void playerRuning(int currentTime, int currentProgress, int secondProgressPer) {
         //播放中
         //发送handler更细UI
         Message message = new Message();
@@ -226,6 +232,7 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         Bundle bundle = new Bundle();
         bundle.putInt(CURRENT_TIME, currentTime);
         bundle.putInt(CURRENT_PROGRESS, currentProgress);
+        bundle.putInt(SECOND_PROGRESS, secondProgressPer);
         message.setData(bundle);
         handler.sendMessage(message);
     }
@@ -244,11 +251,18 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
             switch (msg.what) {
                 case UPDATE_CURRNET_UI:
                     Bundle bundle = msg.getData();
-                    //更新当前时间
+                    //获取当前时间
                     int currentTime = bundle.getInt(CURRENT_TIME, 0);
+                    //获取当前进度条
                     int currentProgress = bundle.getInt(CURRENT_PROGRESS, 0);
+                    //获取当前缓冲进度条
+                    int secondProgress = bundle.getInt(SECOND_PROGRESS, 0);
+                    //更新当前时间
                     tv_bottom_curr_time.setText(String.valueOf(currentTime));
+                    //更新当前进度条
                     seekBar.setProgress(currentProgress);
+                    //更新当前缓冲进度条
+                    seekBar.setSecondaryProgress(secondProgress);
                     break;
             }
         }
@@ -268,6 +282,15 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         }
     }
 
+    //保存当前的播放状态
+    private void savePlayerState(){
+
+    }
+    //读取当前的播放状态
+    private void readPlayerState(){
+
+    }
+
     ExoPlayer.EventListener eventListener = new ExoPlayer.EventListener() {
         @Override
         public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
@@ -282,8 +305,6 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         @Override
         public void onLoadingChanged(boolean isLoading) {
             Log.d("post", "播放: onLoadingChanged ");
-//            tv_bottom_curr_time.setText(player.getContentPosition() / 1000 + "");
-//            seekBar.setProgress((int) (player.getContentPosition() / player.getDuration()));
         }
 
         @Override

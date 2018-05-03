@@ -10,5 +10,5 @@ public class Config {
     //定时器第一次执行间隔
     public static final int firstStart = 0;
     //定时器第二次执行间隔
-    public static final int secondStart = 2000;
+    public static final int secondStart = 500;
 }
