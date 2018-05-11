@@ -18,6 +18,7 @@ import android.widget.FrameLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.acode.player.bean.PlayerBean;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -57,6 +58,8 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     private final String CURRENT_TIME = "CURRENT_TIME";
     //更新当前进度条
     private final String CURRENT_PROGRESS = "CURRENT_PROGRESS";
+    //更新当前缓冲进度条
+    private final String SECOND_PROGRESS = "SECOND_PROGRESS";
     private Context context;
     //视频中间的播放按钮
     private Button btn_start_play;
@@ -76,6 +79,10 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     private SimpleExoPlayer player;
     //定时监听播放状态
     private TimerUtils timerUtils;
+    //播放实体类
+    private PlayerBean playerBean;
+    //记录是不是页面切换
+    private boolean isSucfare;
 
     public AcodePlayerView(@NonNull Context context) {
         super(context);
@@ -131,12 +138,17 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         //设置播放的view
         player.setVideoSurfaceView(sv_player);
 
-        //创建定时间监听播放状态
-        timerUtils = new TimerUtils(this, player);
     }
 
-    //准备播放
-    public void setPlayerUri(Uri uri) {
+    /**
+     * 准备播放
+     *
+     * @param playerBean 播放数据源
+     */
+    public void readyPlayer(PlayerBean playerBean) {
+        this.playerBean = playerBean;
+        //创建定时间监听播放状态
+        timerUtils = new TimerUtils(this, player, playerBean);
         //先将定时器关闭
 //        timerUtils.stop();
         // 测量播放带宽，如果不需要可以传null
@@ -150,7 +162,7 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
 
         // 传入Uri、加载数据的工厂、解析数据的工厂，就能创建出MediaSource
-        MediaSource videoSource = new ExtractorMediaSource(uri,
+        MediaSource videoSource = new ExtractorMediaSource(playerBean.getUri(),
                 dataSourceFactory, extractorsFactory, null, null);
 
         // Prepare
@@ -166,6 +178,9 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         if (player == null) {
             return;
         }
+        if (playerBean == null) {
+            return;
+        }
         //开始监听
         timerUtils.start();
         player.setPlayWhenReady(true);
@@ -175,6 +190,9 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     //暂停播放
     public void pausePlayer() {
         if (player == null) {
+            return;
+        }
+        if (timerUtils == null) {
             return;
         }
         //终止监听
@@ -188,52 +206,112 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         if (player == null) {
             return;
         }
+        timerUtils.stop();
         player.release();
+        player = null;
+    }
+
+    /**
+     * 再次回到此页面调用此方法
+     */
+    public void onResume() {
+        if (!isSucfare) {
+            return;
+        }
+        isSucfare = false;
+        createPlayer();
+        readyPlayer(playerBean);
+        Log.d("post","A:"+playerBean.getCurrentPosition());
+        Log.d("post","B:"+playerBean.getDuration());
+        if (playerBean.getCurrentPosition()>=playerBean.getDuration()){
+            player.seekTo(playerBean.getDuration());
+            player.setPlayWhenReady(false);
+            timerUtils.stop();
+            btn_start_play.setText("播放");
+            return;
+        }
+        player.seekTo(playerBean.getCurrentPosition());
+        player.setPlayWhenReady(true);
+        timerUtils.start();
+        btn_start_play.setText("暂停");
+    }
+
+    /**
+     * 页面切换调用此方法
+     */
+    public void onPause() {
+        isSucfare = true;
+        if (player == null) {
+            return;
+        }
+        if (timerUtils == null) {
+            return;
+        }
+        //保存当前视频的播放位置
+        playerBean.setCurrentPosition(player.getCurrentPosition());
+        //保存当前视频的总长度
+        playerBean.setDuration(player.getDuration());
+        //更新界面
+        btn_start_play.setText("播放");
+        cancel();
     }
 
     //初始化播放器
     private void initPlayer() {
-        //更新界面ui
-        tv_bottom_curr_time.setText("0");
+        //初始化界面UI
+        //当前的播放时间
+        tv_bottom_curr_time.setText(playerBean.getCurrentTime() + "");
+        //当前视频的总时长
         tv_bottom_end_time.setText(String.valueOf(player.getDuration() / 1000));
-        //进度条和当前时间的监听
-//        progressManage();
-//        //监听进度条
+        //当前进度条
+        seekBar.setProgress(playerBean.getCurrentProgress());
+        //当前缓冲进度条
+        seekBar.setSecondaryProgress(playerBean.getSecondProgress());
+        //监听进度条
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                Log.d("post", "当前：" + i);
+                Log.d("post", "不想以前，不谈以后，活在当下：" + i);
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                Log.d("post", "摁住");
+                Log.d("post", "我要紧紧的把你抱住：" + seekBar.getProgress());
+                pausePlayer();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Log.d("post", "放开：");
+                Log.d("post", "对你的疼爱是手放开：" + seekBar.getProgress());
+                player.seekTo(seekBar.getProgress() * (player.getDuration() / 100));
+                int currentTime = (int) (player.getCurrentPosition() / 1000);
+                int currentProgress = (int) (new BigDecimal((float) player.getCurrentPosition() / player.getDuration()).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue() * 100);
+                int secondProgressPer = player.getBufferedPercentage();
+                playerBean.setCurrentTime(currentTime);
+                playerBean.setCurrentProgress(currentProgress);
+                playerBean.setSecondProgress(secondProgressPer);
+                startPlayer();
             }
         });
     }
 
     @Override
-    public void playerRuning(int currentTime, int currentProgress) {
+    public void playerRuning(PlayerBean playerBean) {
         //播放中
-        //发送handler更细UI
-        Message message = new Message();
-        message.what = UPDATE_CURRNET_UI;
-        Bundle bundle = new Bundle();
-        bundle.putInt(CURRENT_TIME, currentTime);
-        bundle.putInt(CURRENT_PROGRESS, currentProgress);
-        message.setData(bundle);
-        handler.sendMessage(message);
+        this.playerBean = playerBean;
+        handler.sendEmptyMessage(UPDATE_CURRNET_UI);
     }
 
     @Override
-    public void playerStop() {
-
+    public void playPause() {
+        Log.d("post", "播放暂停");
     }
+
+    @Override
+    public void playerComplete() {
+        Log.d("post", "播放完成");
+    }
+
 
     //开启线程读取进度
     private Handler handler = new Handler() {
@@ -243,12 +321,12 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
             //如果是播放状态  去更新进度条and当前的时间
             switch (msg.what) {
                 case UPDATE_CURRNET_UI:
-                    Bundle bundle = msg.getData();
                     //更新当前时间
-                    int currentTime = bundle.getInt(CURRENT_TIME, 0);
-                    int currentProgress = bundle.getInt(CURRENT_PROGRESS, 0);
-                    tv_bottom_curr_time.setText(String.valueOf(currentTime));
-                    seekBar.setProgress(currentProgress);
+                    tv_bottom_curr_time.setText(String.valueOf(playerBean.getCurrentTime()));
+                    //更新当前进度条
+                    seekBar.setProgress(playerBean.getCurrentProgress());
+                    //更新当前缓冲进度条
+                    seekBar.setSecondaryProgress(playerBean.getSecondProgress());
                     break;
             }
         }
@@ -259,6 +337,9 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         switch (view.getId()) {
             case R.id.btn_bottom_start_play:
             case R.id.btn_start_play:
+                if (player == null) {
+                    return;
+                }
                 if (!player.getPlayWhenReady()) {
                     startPlayer();
                     return;
@@ -267,6 +348,17 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
                 break;
         }
     }
+
+    //保存当前的播放状态
+    private void savePlayerState() {
+
+    }
+
+    //读取当前的播放状态
+    private void readPlayerState() {
+
+    }
+
 
     ExoPlayer.EventListener eventListener = new ExoPlayer.EventListener() {
         @Override
@@ -282,8 +374,6 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         @Override
         public void onLoadingChanged(boolean isLoading) {
             Log.d("post", "播放: onLoadingChanged ");
-//            tv_bottom_curr_time.setText(player.getContentPosition() / 1000 + "");
-//            seekBar.setProgress((int) (player.getContentPosition() / player.getDuration()));
         }
 
         @Override
@@ -362,7 +452,7 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
 
         @Override
         public void onPositionDiscontinuity(int reason) {
-            Log.d("post", "播放: onPositionDiscontinuity  ");
+            Log.d("post", "播放: onPositionDiscontinuity  " + reason);
         }
 
         @Override

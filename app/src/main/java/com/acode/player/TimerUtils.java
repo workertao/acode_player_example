@@ -2,6 +2,7 @@ package com.acode.player;
 
 import android.util.Log;
 
+import com.acode.player.bean.PlayerBean;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 
 import java.math.BigDecimal;
@@ -12,7 +13,7 @@ import java.util.TimerTask;
  * user:yangtao
  * date:2018/4/261227
  * email:yangtao@bjxmail.com
- * introduce:功能
+ * introduce:监听视频播放进度
  */
 public class TimerUtils {
     private Timer timer;
@@ -23,9 +24,12 @@ public class TimerUtils {
 
     private SimpleExoPlayer player;
 
-    public TimerUtils(AcodePlayerStateListener acodePlayerStateListener, SimpleExoPlayer player) {
+    private PlayerBean playerBean;
+
+    public TimerUtils(AcodePlayerStateListener acodePlayerStateListener, SimpleExoPlayer player, PlayerBean playerBean) {
         this.acodePlayerStateListener = acodePlayerStateListener;
         this.player = player;
+        this.playerBean = playerBean;
     }
 
 
@@ -46,6 +50,7 @@ public class TimerUtils {
         }
     }
 
+
     class MyTimerTask extends TimerTask {
 
         @Override
@@ -55,17 +60,22 @@ public class TimerUtils {
             }
             if (!player.getPlayWhenReady()) {
                 stop();
-                acodePlayerStateListener.playerStop();
+                acodePlayerStateListener.playPause();
                 return;
             }
             int currentTime = (int) (player.getCurrentPosition() / 1000);
-            int currentProgress = (int) (new BigDecimal((float) player.getCurrentPosition() / player.getDuration()).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue() * 100);
-            Log.d("post", "当前timer内存地址：" + timer.toString() + "    当前进度：" + currentProgress);
+            int eachProgress = (int) (player.getDuration() / 101);
+            int currentProgress = (int) ((player.getContentPosition() / eachProgress));
+            Log.d("post","jindu:"+currentProgress);
+            int secondProgressPer = player.getBufferedPercentage();
+            playerBean.setCurrentTime(currentTime);
+            playerBean.setCurrentProgress(currentProgress);
+            playerBean.setSecondProgress(secondProgressPer);
             if (currentProgress < 100) {
-                acodePlayerStateListener.playerRuning(currentTime, currentProgress);
+                acodePlayerStateListener.playerRuning(playerBean);
                 return;
             }
-            acodePlayerStateListener.playerStop();
+            acodePlayerStateListener.playerComplete();
             stop();
         }
     }

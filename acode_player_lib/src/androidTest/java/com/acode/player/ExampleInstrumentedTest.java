@@ -7,6 +7,8 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
+
 import static org.junit.Assert.*;
 
 /**
@@ -22,5 +24,12 @@ public class ExampleInstrumentedTest {
         Context appContext = InstrumentationRegistry.getTargetContext();
 
         assertEquals("com.example.acode_player_lib.test", appContext.getPackageName());
+    }
+
+    @Test
+    public void test() throws IOException {
+        System.out.print("Input a char:");
+        char c=(char)System.in.read();
+        System.out.println("c = " + c);
     }
 }

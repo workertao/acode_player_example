@@ -25,6 +25,8 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.acode.player.bean.PlayerBean;
+import com.acode.player.data.Data;
 import com.acode.player.lib.entity.Material;
 import com.acode.player.lib.files.VideosFilsUtils;
 import com.acode.player.lib.utils.PermissionUtils;
@@ -72,9 +74,9 @@ public class MainActivity extends Activity {
     //获取本地视频列表
     private Button btn;
 
-    private LinearLayout ll_video_files_root;
+    private Button btn_intent;
 
-    private List<Material> materialList;
+    private LinearLayout ll_video_files_root;
 
     private PermissionUtils permissionUtils;
 
@@ -108,69 +110,51 @@ public class MainActivity extends Activity {
     private void initView() {
         acodePlayerView = findViewById(R.id.acodePlayerView);
         btn = findViewById(R.id.btn);
+        btn_intent = findViewById(R.id.btn_intent);
         ll_video_files_root = findViewById(R.id.ll_video_files_root);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ll_video_files_root.removeAllViews();
-                materialList = VideosFilsUtils.getAllLocalVideos(MainActivity.this);
-                Log.d("post", "materialList:" + materialList.toString());
-                for (final Material material : materialList) {
+                for (final PlayerBean playerBean : Data.getPlayerBeans()) {
                     Button button = new Button(MainActivity.this);
-                    button.setText(material.getTitle());
+                    button.setText(playerBean.getTitle());
                     ll_video_files_root.addView(button);
                     button.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             acodePlayerView.pausePlayer();
-                            acodePlayerView.setPlayerUri(getFileUri(new File(material.getFilePath())));
+                            acodePlayerView.readyPlayer(playerBean);
                         }
                     });
                 }
-                Button button = new Button(MainActivity.this);
-                button.setText("http://oif1jvh5f.bkt.clouddn.com/tmp.mp4");
-                ll_video_files_root.addView(button);
-                button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        acodePlayerView.pausePlayer();
-                        acodePlayerView.setPlayerUri(Uri.parse("http://oif1jvh5f.bkt.clouddn.com/tmp.mp4"));
-                    }
-                });
-                Button button1 = new Button(MainActivity.this);
-                button1.setText("http://oif1jvh5f.bkt.clouddn.com/CFNetwork.mp4");
-                ll_video_files_root.addView(button1);
-                button1.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        acodePlayerView.pausePlayer();
-                        acodePlayerView.setPlayerUri(Uri.parse("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_t3QJVZ.mp4"));
-                    }
-                });
+            }
+        });
+        btn_intent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this,TestActivity.class));
             }
         });
     }
 
-
-    private Uri getFileUri(File file) {
-        Uri uri = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            uri = FileProvider.getUriForFile(this, this.getPackageName() + ".fileprovider", file);
-        } else {
-            uri = Uri.fromFile(file);
-        }
-        return uri;
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d("post", "onStart()");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        acodePlayerView.onResume();
         Log.d("post", "onResume()");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        acodePlayerView.onPause();
         Log.d("post", "onPause()");
     }
 
@@ -188,7 +172,6 @@ public class MainActivity extends Activity {
         acodePlayerView.cancel();
         super.onDestroy();
     }
-
 
     /**
      * 解决找不到某些jar的静态方法

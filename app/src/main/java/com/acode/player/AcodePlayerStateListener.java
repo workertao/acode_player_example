@@ -1,5 +1,7 @@
 package com.acode.player;
 
+import com.acode.player.bean.PlayerBean;
+
 /**
  * user:yangtao
  * date:2018/4/261451
@@ -8,9 +10,20 @@ package com.acode.player;
  */
 public interface AcodePlayerStateListener {
 
-    //播放中
-    void playerRuning(int currentTime, int currentProgress);
+    /**
+     * 播放中
+     *
+     * @param playerBean 当前播放视频实体
+     */
+    void playerRuning(PlayerBean playerBean);
 
-    //暂停
-    void playerStop();
+    /**
+     * 暂停
+     */
+    void playPause();
+
+    /**
+     * 播放完成
+     */
+    void playerComplete();
 }

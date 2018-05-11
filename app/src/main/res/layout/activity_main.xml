@@ -23,6 +23,12 @@
             android:orientation="vertical">
 
             <Button
+                android:id="@+id/btn_intent"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="跳转" />
+
+            <Button
                 android:id="@+id/btn"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
