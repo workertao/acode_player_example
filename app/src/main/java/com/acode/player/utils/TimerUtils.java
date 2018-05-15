@@ -1,7 +1,9 @@
-package com.acode.player;
+package com.acode.player.utils;
 
 import android.util.Log;
 
+import com.acode.player.AcodePlayerStateListener;
+import com.acode.player.Config;
 import com.acode.player.bean.PlayerBean;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 
@@ -60,22 +62,21 @@ public class TimerUtils {
             }
             if (!player.getPlayWhenReady()) {
                 stop();
-                acodePlayerStateListener.playPause();
                 return;
             }
             int currentTime = (int) (player.getCurrentPosition() / 1000);
-            int eachProgress = (int) (player.getDuration() / 101);
+            int eachProgress = (int) (player.getDuration() / 100);
             int currentProgress = (int) ((player.getContentPosition() / eachProgress));
-            Log.d("post","jindu:"+currentProgress);
             int secondProgressPer = player.getBufferedPercentage();
             playerBean.setCurrentTime(currentTime);
             playerBean.setCurrentProgress(currentProgress);
             playerBean.setSecondProgress(secondProgressPer);
+            playerBean.setCurrentPosition(player.getCurrentPosition());
+            playerBean.setDuration(player.getDuration());
             if (currentProgress < 100) {
                 acodePlayerStateListener.playerRuning(playerBean);
                 return;
             }
-            acodePlayerStateListener.playerComplete();
             stop();
         }
     }

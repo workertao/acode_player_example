@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class Data {
     public static ArrayList<PlayerBean> getPlayerBeans() {
         ArrayList<PlayerBean> playerBeans = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 3; i++) {
             PlayerBean playerBean = new PlayerBean();
             playerBean.setUrl("");
             playerBean.setCurrentTime(0);
@@ -33,6 +33,11 @@ public class Data {
                 playerBean.setTitle("烟火里的尘埃");
                 playerBean.setInfo("不是华晨宇唱的烟火里的尘埃");
                 playerBean.setUri(Uri.parse("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_t3QJVZ.mp4"));
+            }
+            if (i == 2) {
+                playerBean.setTitle("螳螂拳");
+                playerBean.setInfo("热血像那红日光");
+                playerBean.setUri(Uri.parse("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_5Vkbz0.mp4"));
             }
             playerBeans.add(playerBean);
         }

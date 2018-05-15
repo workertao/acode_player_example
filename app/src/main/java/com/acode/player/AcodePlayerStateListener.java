@@ -16,14 +16,4 @@ public interface AcodePlayerStateListener {
      * @param playerBean 当前播放视频实体
      */
     void playerRuning(PlayerBean playerBean);
-
-    /**
-     * 暂停
-     */
-    void playPause();
-
-    /**
-     * 播放完成
-     */
-    void playerComplete();
 }

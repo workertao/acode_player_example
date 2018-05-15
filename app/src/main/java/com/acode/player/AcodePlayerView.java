@@ -1,28 +1,42 @@
 package com.acode.player;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
-import android.media.session.PlaybackState;
-import android.net.Uri;
-import android.os.Bundle;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.method.Touch;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.Button;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.acode.player.anim.AnimUtils;
 import com.acode.player.bean.PlayerBean;
+import com.acode.player.utils.DimenUtils;
+import com.acode.player.utils.TimerUtils;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -42,31 +56,23 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
 import java.math.BigDecimal;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * user:yangtao
  * date:2018/4/261348
  * email:yangtao@bjxmail.com
- * introduce:功能
+ * introduce:播放器
  */
-public class AcodePlayerView extends FrameLayout implements View.OnClickListener, AcodePlayerStateListener {
+public class AcodePlayerView extends FrameLayout implements View.OnClickListener, AcodePlayerStateListener,View.OnTouchListener {
     //更新当前时间和进度条
     private final int UPDATE_CURRNET_UI = 1000;
-    //更新当前时间
-    private final String CURRENT_TIME = "CURRENT_TIME";
-    //更新当前进度条
-    private final String CURRENT_PROGRESS = "CURRENT_PROGRESS";
-    //更新当前缓冲进度条
-    private final String SECOND_PROGRESS = "SECOND_PROGRESS";
     private Context context;
     //视频中间的播放按钮
-    private Button btn_start_play;
-    //视频左下角的播放按钮
-    private Button btn_bottom_start_play;
+    private ImageView btn_start_play;
     //视频右侧的放大/缩小按钮
-    private Button btn_bottom_full_screen;
+    private ImageView btn_bottom_full_screen;
+    //播放器
+    private FrameLayout rl_player_view;
     //当前播放时间
     private TextView tv_bottom_curr_time;
     //总时长
@@ -83,6 +89,23 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     private PlayerBean playerBean;
     //记录是不是页面切换
     private boolean isSucfare;
+    //loading
+    private ImageView iv_loading;
+    //播放器
+    private View view;
+    //控制播放的view
+    private RelativeLayout rl_controller_view;
+    //是否在缓冲加载  默认未加载
+    private boolean isLoad;
+    //返回键
+    private ImageView img_back;
+    //title
+    private TextView tv_title;
+    //loading
+    private RelativeLayout rl_loading;
+    //手势监听
+    private GestureDetector gestureDetector;
+
 
     public AcodePlayerView(@NonNull Context context) {
         super(context);
@@ -102,20 +125,30 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         initView();
     }
 
+    @SuppressLint("WrongViewCast")
     private void initView() {
-        View view = LayoutInflater.from(context).inflate(R.layout.acode_player_view, null);
+        gestureDetector = new GestureDetector(context,new PlayerGestureListener());
+        view = LayoutInflater.from(context).inflate(R.layout.acode_player_view, null);
+        rl_player_view = view.findViewById(R.id.rl_player_view);
+        img_back = view.findViewById(R.id.img_back);
+        tv_title = view.findViewById(R.id.tv_title);
+        rl_controller_view = view.findViewById(R.id.rl_controller_view);
         sv_player = view.findViewById(R.id.sv_player);
         seekBar = view.findViewById(R.id.seekBar);
         btn_start_play = view.findViewById(R.id.btn_start_play);
-        btn_bottom_start_play = view.findViewById(R.id.btn_bottom_start_play);
         btn_bottom_full_screen = view.findViewById(R.id.btn_bottom_full_screen);
         tv_bottom_curr_time = view.findViewById(R.id.tv_bottom_curr_time);
         tv_bottom_end_time = view.findViewById(R.id.tv_bottom_end_time);
         btn_start_play.setOnClickListener(this);
+        btn_bottom_full_screen.setOnClickListener(this);
+        rl_controller_view.setOnClickListener(this);
+        sv_player.setOnClickListener(this);
+        img_back.setOnClickListener(this);
         if (player == null) {
             createPlayer();
         }
         this.addView(view);
+        sv_player.setOnTouchListener(this);
     }
 
     //创建播放器
@@ -165,11 +198,17 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         MediaSource videoSource = new ExtractorMediaSource(playerBean.getUri(),
                 dataSourceFactory, extractorsFactory, null, null);
 
-        // Prepare
+        // 添加数据源
         player.prepare(videoSource);
 
-        //播放监听
+        // 设置播放进度
+        player.seekTo(playerBean.getCurrentPosition());
+
+        // 播放监听
         player.addListener(eventListener);
+
+        //设置标题
+        tv_title.setText(playerBean.getInfo());
     }
 
 
@@ -184,8 +223,20 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         //开始监听
         timerUtils.start();
         player.setPlayWhenReady(true);
-        btn_start_play.setText("暂停");
+        btn_start_play.setImageResource(R.mipmap.exo_controls_pause);
     }
+
+    /**
+     * 播放中
+     *
+     * @param playerBean 当前播放视频实体
+     */
+    @Override
+    public void playerRuning(PlayerBean playerBean) {
+        this.playerBean = playerBean;
+        handler.sendEmptyMessage(UPDATE_CURRNET_UI);
+    }
+
 
     //暂停播放
     public void pausePlayer() {
@@ -198,12 +249,15 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         //终止监听
         timerUtils.stop();
         player.setPlayWhenReady(false);
-        btn_start_play.setText("播放");
+        btn_start_play.setImageResource(R.mipmap.exo_controls_play);
     }
 
     //释放资源
     public void cancel() {
         if (player == null) {
+            return;
+        }
+        if (timerUtils == null) {
             return;
         }
         timerUtils.stop();
@@ -218,22 +272,23 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         if (!isSucfare) {
             return;
         }
+        if (playerBean == null) {
+            return;
+        }
         isSucfare = false;
         createPlayer();
         readyPlayer(playerBean);
-        Log.d("post","A:"+playerBean.getCurrentPosition());
-        Log.d("post","B:"+playerBean.getDuration());
-        if (playerBean.getCurrentPosition()>=playerBean.getDuration()){
+        if (playerBean.getCurrentPosition() >= playerBean.getDuration()) {
             player.seekTo(playerBean.getDuration());
             player.setPlayWhenReady(false);
             timerUtils.stop();
-            btn_start_play.setText("播放");
+            btn_start_play.setImageResource(R.mipmap.exo_controls_play);
             return;
         }
         player.seekTo(playerBean.getCurrentPosition());
-        player.setPlayWhenReady(true);
+        player.setPlayWhenReady(false);
         timerUtils.start();
-        btn_start_play.setText("暂停");
+        btn_start_play.setImageResource(R.mipmap.exo_controls_play);
     }
 
     /**
@@ -247,13 +302,31 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         if (timerUtils == null) {
             return;
         }
-        //保存当前视频的播放位置
-        playerBean.setCurrentPosition(player.getCurrentPosition());
-        //保存当前视频的总长度
-        playerBean.setDuration(player.getDuration());
         //更新界面
-        btn_start_play.setText("播放");
+        btn_start_play.setImageResource(R.mipmap.exo_controls_play);
         cancel();
+    }
+
+    /**
+     * 展示loading
+     */
+    public void showLoading() {
+        if (rl_loading == null){
+            rl_loading = view.findViewById(R.id.rl_loading);
+        }
+        if (iv_loading == null) {
+            iv_loading = view.findViewById(R.id.iv_loading);
+            AnimUtils.playRotation360(iv_loading);
+        }
+        rl_loading.setVisibility(VISIBLE);
+    }
+
+    //隐藏loading
+    public void dismissLoading() {
+        if (rl_loading == null){
+            return;
+        }
+        rl_loading.setVisibility(GONE);
     }
 
     //初始化播放器
@@ -271,18 +344,15 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                Log.d("post", "不想以前，不谈以后，活在当下：" + i);
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                Log.d("post", "我要紧紧的把你抱住：" + seekBar.getProgress());
                 pausePlayer();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Log.d("post", "对你的疼爱是手放开：" + seekBar.getProgress());
                 player.seekTo(seekBar.getProgress() * (player.getDuration() / 100));
                 int currentTime = (int) (player.getCurrentPosition() / 1000);
                 int currentProgress = (int) (new BigDecimal((float) player.getCurrentPosition() / player.getDuration()).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue() * 100);
@@ -290,28 +360,12 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
                 playerBean.setCurrentTime(currentTime);
                 playerBean.setCurrentProgress(currentProgress);
                 playerBean.setSecondProgress(secondProgressPer);
+                playerBean.setCurrentPosition(player.getCurrentPosition());
+                playerBean.setDuration(player.getDuration());
                 startPlayer();
             }
         });
     }
-
-    @Override
-    public void playerRuning(PlayerBean playerBean) {
-        //播放中
-        this.playerBean = playerBean;
-        handler.sendEmptyMessage(UPDATE_CURRNET_UI);
-    }
-
-    @Override
-    public void playPause() {
-        Log.d("post", "播放暂停");
-    }
-
-    @Override
-    public void playerComplete() {
-        Log.d("post", "播放完成");
-    }
-
 
     //开启线程读取进度
     private Handler handler = new Handler() {
@@ -335,7 +389,6 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.btn_bottom_start_play:
             case R.id.btn_start_play:
                 if (player == null) {
                     return;
@@ -346,20 +399,89 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
                 }
                 pausePlayer();
                 break;
+            case R.id.btn_bottom_full_screen:
+            case R.id.img_back:
+                //int ORIENTATION_PORTRAIT = 1;  竖屏
+                //int ORIENTATION_LANDSCAPE = 2; 横屏
+                int screenNum = getResources().getConfiguration().orientation;
+                if (screenNum == 2) {
+                    //切换成竖屏
+                    ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    return;
+                }
+                //切换成横屏
+                ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                break;
+            case R.id.rl_controller_view:
+                if (isLoad) {
+                    return;
+                }
+                rl_controller_view.setVisibility(GONE);
+                break;
+            case R.id.sv_player:
+                if (isLoad) {
+                    return;
+                }
+                rl_controller_view.setVisibility(VISIBLE);
+                break;
         }
     }
 
-    //保存当前的播放状态
-    private void savePlayerState() {
-
+    //横竖屏切换
+    public void onConfigurationChanged(int newConfig) {
+        if (newConfig == Configuration.ORIENTATION_LANDSCAPE) {
+            screenFull();
+        } else {
+            screenVertical();
+        }
     }
 
-    //读取当前的播放状态
-    private void readPlayerState() {
-
+    //横屏播放
+    private void screenFull() {
+        ((Activity) context).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN); //隐藏状态栏
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        rl_player_view.setLayoutParams(params);
     }
 
+    //竖屏播放
+    private void screenVertical() {
+        ((Activity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN); //显示状态栏
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        params.height = DimenUtils.dip2px(context, 300);
+        rl_player_view.setLayoutParams(params);
+    }
 
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        //将触摸事件交给GestureDetector来处理
+        return gestureDetector.onTouchEvent(event);
+    }
+
+    //手势监听
+    private class PlayerGestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            Log.d("post","onDoubleTap");
+            return true;
+        }
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+            Log.d("post","onDown");
+            return super.onDown(e);
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            Log.d("post","e1:"+e1.getAction()+"");
+            Log.d("post","e2:"+e2.getAction()+"");
+            Log.d("post","distanceX:"+distanceX);
+            Log.d("post","distanceY:"+distanceY);
+            return super.onScroll(e1, e2, distanceX, distanceY);
+        }
+    }
+
+    //播放监听
     ExoPlayer.EventListener eventListener = new ExoPlayer.EventListener() {
         @Override
         public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
@@ -373,64 +495,43 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
 
         @Override
         public void onLoadingChanged(boolean isLoading) {
-            Log.d("post", "播放: onLoadingChanged ");
+            Log.d("post", "播放: onLoadingChanged " + isLoading);
         }
 
+        /**
+         * 视频的播放状态
+         * STATE_IDLE 播放器空闲，既不在准备也不在播放
+         * STATE_PREPARING 播放器正在准备
+         * STATE_BUFFERING 播放器已经准备完毕，但无法立即播放。此状态的原因有很多，但常见的是播放器需要缓冲更多数据才能开始播放
+         * STATE_ENDED 播放已完毕
+         */
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
             switch (playbackState) {
-                case PlaybackState.STATE_PLAYING:
+                case Player.STATE_BUFFERING:
+                    //缓冲中展示loading
+                    isLoad = true;
+                    rl_controller_view.setVisibility(GONE);
+                    showLoading();
+                    Log.d("post", "STATE_BUFFERING");
+                    break;
+                case Player.STATE_ENDED:
+                    Log.d("post", "STATE_ENDED");
+                    timerUtils.stop();
+                    btn_start_play.setImageResource(R.mipmap.exo_controls_pause);
+                    break;
+                case Player.STATE_IDLE:
+                    Log.d("post", "STATE_IDLE:网络状态差，请检查网络。。。");
+                    Toast.makeText(context, "网络状态差，请检查网络", Toast.LENGTH_SHORT).show();
+                    break;
+                case Player.STATE_READY:
+                    Log.d("post", "STATE_READY：" + player.getNextWindowIndex());
+                    isLoad = false;
+                    dismissLoading();
                     //初始化播放点击事件并设置总时长
-                    Log.d("post：", "总时长：" + player.getDuration() / 1000);
-                    Log.d("post", "播放状态: 准备 playing");
                     initPlayer();
                     break;
 
-                case PlaybackState.STATE_BUFFERING:
-                    Log.d("post", "播放状态: 缓存完成 playing");
-                    break;
-
-                case PlaybackState.STATE_CONNECTING:
-                    Log.d("post", "播放状态: 连接 CONNECTING");
-                    break;
-
-                case PlaybackState.STATE_ERROR://错误
-                    Log.d("post", "播放状态: 错误 STATE_ERROR");
-                    break;
-
-                case PlaybackState.STATE_FAST_FORWARDING:
-                    Log.d("post", "播放状态: 快速传递");
-                    break;
-
-                case PlaybackState.STATE_NONE:
-                    Log.d("post", "播放状态: 无 STATE_NONE");
-                    break;
-
-                case PlaybackState.STATE_PAUSED:
-                    Log.d("post", "播放状态: 暂停 PAUSED");
-                    break;
-
-                case PlaybackState.STATE_REWINDING:
-                    Log.d("post", "播放状态: 倒回 REWINDING");
-                    break;
-
-                case PlaybackState.STATE_SKIPPING_TO_NEXT:
-                    Log.d("post", "播放状态: 跳到下一个");
-                    break;
-
-                case PlaybackState.STATE_SKIPPING_TO_PREVIOUS:
-                    Log.d("post", "播放状态: 跳到上一个");
-                    break;
-
-                case PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM:
-                    Log.d("post", "播放状态: 跳到指定的Item");
-                    break;
-
-                case PlaybackState.STATE_STOPPED:
-                    //停止播放
-                    timerUtils.stop();
-                    Log.d("post", "播放状态: 停止的 STATE_STOPPED");
-                    break;
             }
         }
 
@@ -465,4 +566,16 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
             Log.d("post", "播放状态: onSeekProcessed");
         }
     };
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == event.KEYCODE_BACK) {
+            int screenNum = getResources().getConfiguration().orientation;
+            if (screenNum == 2) {
+                //切换成竖屏
+                ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                return true;
+            }
+        }
+        return false;
+    }
 }

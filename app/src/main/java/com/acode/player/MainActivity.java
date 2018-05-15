@@ -4,7 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Build;
@@ -17,6 +19,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.View;
@@ -24,12 +27,14 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.acode.player.bean.PlayerBean;
 import com.acode.player.data.Data;
 import com.acode.player.lib.entity.Material;
 import com.acode.player.lib.files.VideosFilsUtils;
 import com.acode.player.lib.utils.PermissionUtils;
+import com.acode.player.utils.NetUtils;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -69,7 +74,8 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AcodeBaseActivity {
+    public static String TAG = "MainActivity";
     private final int PERMISSION_REQ_CODE = 100;
     //获取本地视频列表
     private Button btn;
@@ -82,14 +88,38 @@ public class MainActivity extends Activity {
 
     private AcodePlayerView acodePlayerView;
 
+    private NetUtils netUtils;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("post", "onCreate()");
+        Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initNet();
         initView();
         initData();
+    }
+
+    private void initNet() {
+        netUtils = new NetUtils(this);
+        netUtils.setOnNetBackListener(new NetUtils.OnNetBackListener() {
+            @Override
+            public void onNetWork(int type) {
+                switch (type) {
+                    case NetUtils.TYPE_NONE:
+                        Toast.makeText(MainActivity.this, "没网络", Toast.LENGTH_SHORT).show();
+                        break;
+                    case NetUtils.TYPE_WIFI:
+                        Toast.makeText(MainActivity.this, "wifi网络", Toast.LENGTH_SHORT).show();
+                        break;
+                    case NetUtils.TYPE_MOBILE:
+                        Toast.makeText(MainActivity.this, "移动网络", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        });
+        netUtils.registerReceiverNet();
     }
 
     private void initData() {
@@ -133,7 +163,7 @@ public class MainActivity extends Activity {
         btn_intent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this,TestActivity.class));
+                startActivity(new Intent(MainActivity.this, TestActivity.class));
             }
         });
     }
@@ -141,36 +171,60 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d("post", "onStart()");
+        Log.d(TAG, "onStart()");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         acodePlayerView.onResume();
-        Log.d("post", "onResume()");
+        Log.d(TAG, "onResume()");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         acodePlayerView.onPause();
-        Log.d("post", "onPause()");
+        Log.d(TAG, "onPause()");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d("post", "onStop()");
+        Log.d(TAG, "onStop()");
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        Log.d("post", "横竖屏切换");
+        acodePlayerView.onConfigurationChanged(newConfig.orientation);
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(TAG,"onRestart");
     }
 
     @Override
     protected void onDestroy() {
-        if (acodePlayerView == null) {
-            return;
+        Log.d(TAG,"onDestroy");
+        if (acodePlayerView != null) {
+            acodePlayerView.cancel();
         }
-        acodePlayerView.cancel();
+        if (netUtils != null) {
+            netUtils.unNetworkBroadcastReceiver();
+        }
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (acodePlayerView ==  null){
+            return super.onKeyDown(keyCode, event);
+        }
+        return acodePlayerView.onKeyDown(keyCode,event);
     }
 
     /**
