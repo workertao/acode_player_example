@@ -9,13 +9,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.method.Touch;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,32 +27,10 @@ import android.widget.Toast;
 
 import com.acode.player.anim.AnimUtils;
 import com.acode.player.bean.PlayerBean;
+import com.acode.player.listener.AcodePlayerListener;
 import com.acode.player.utils.DimenUtils;
-import com.acode.player.utils.TimerUtils;
-import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.PlaybackParameters;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.util.Util;
-
-import java.math.BigDecimal;
+import com.acode.player.utils.GestureEnum;
+import com.acode.player.utils.StringUtils;
 
 /**
  * user:yangtao
@@ -63,7 +38,7 @@ import java.math.BigDecimal;
  * email:yangtao@bjxmail.com
  * introduce:播放器
  */
-public class AcodePlayerView extends FrameLayout implements View.OnClickListener, AcodePlayerStateListener,View.OnTouchListener {
+public class AcodePlayerView extends FrameLayout implements View.OnClickListener {
     //更新当前时间和进度条
     private final int UPDATE_CURRNET_UI = 1000;
     private Context context;
@@ -82,9 +57,8 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     //播放内容的view
     private SurfaceView sv_player;
     //播放器
-    private SimpleExoPlayer player;
+    private AcodePlayer player;
     //定时监听播放状态
-    private TimerUtils timerUtils;
     //播放实体类
     private PlayerBean playerBean;
     //记录是不是页面切换
@@ -103,8 +77,22 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     private TextView tv_title;
     //loading
     private RelativeLayout rl_loading;
-    //手势监听
-    private GestureDetector gestureDetector;
+    //系统设置音量/亮度
+    private LinearLayout ll_player_sys_set_state;
+    //音量还是亮度
+    private TextView tv_sys_type;
+    //进度
+    private TextView tv_sys_num;
+    //进度条
+    private SeekBar sb_sys_progress;
+    //进度view
+    private LinearLayout ll_player_player_progress;
+    //进度name
+    private TextView tv_player_progress_name;
+    //进度比
+    private TextView tv_player_progress;
+    //进度的进度条
+    private SeekBar sb_player_progress;
 
 
     public AcodePlayerView(@NonNull Context context) {
@@ -127,8 +115,18 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
 
     @SuppressLint("WrongViewCast")
     private void initView() {
-        gestureDetector = new GestureDetector(context,new PlayerGestureListener());
         view = LayoutInflater.from(context).inflate(R.layout.acode_player_view, null);
+        initPlayerView();
+        initSystemSetView();
+        initPlayerProgressView();
+        this.addView(view);
+        initListener();
+        initData();
+    }
+
+
+    //初始化播放器的布局
+    private void initPlayerView() {
         rl_player_view = view.findViewById(R.id.rl_player_view);
         img_back = view.findViewById(R.id.img_back);
         tv_title = view.findViewById(R.id.tv_title);
@@ -139,155 +137,169 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         btn_bottom_full_screen = view.findViewById(R.id.btn_bottom_full_screen);
         tv_bottom_curr_time = view.findViewById(R.id.tv_bottom_curr_time);
         tv_bottom_end_time = view.findViewById(R.id.tv_bottom_end_time);
+    }
+
+    //初始化系统设置布局
+    public void initSystemSetView() {
+        ll_player_sys_set_state = view.findViewById(R.id.ll_player_sys_set_state);
+        tv_sys_type = view.findViewById(R.id.tv_sys_type);
+        tv_sys_num = view.findViewById(R.id.tv_sys_num);
+        sb_sys_progress = view.findViewById(R.id.sb_sys_progress);
+    }
+
+    private void initPlayerProgressView() {
+        ll_player_player_progress = view.findViewById(R.id.ll_player_player_progress);
+        tv_player_progress_name = view.findViewById(R.id.tv_player_progress_name);
+        tv_player_progress = view.findViewById(R.id.tv_player_progress);
+        sb_player_progress = view.findViewById(R.id.sb_player_progress);
+    }
+
+    //设置监听
+    public void initListener() {
         btn_start_play.setOnClickListener(this);
         btn_bottom_full_screen.setOnClickListener(this);
         rl_controller_view.setOnClickListener(this);
         sv_player.setOnClickListener(this);
         img_back.setOnClickListener(this);
-        if (player == null) {
-            createPlayer();
-        }
-        this.addView(view);
-        sv_player.setOnTouchListener(this);
     }
 
-    //创建播放器
-    private void createPlayer() {
-        // step1. 创建一个默认的TrackSelector
-        Handler mainHandler = new Handler();
+    private void initData() {
+        player = new AcodePlayer(context, sv_player, new AcodePlayerListener() {
+            @Override
+            public void onLoading() {
+                Log.d("post", "缓冲中。。。");
+                //缓冲中展示loading
+                isLoad = true;
+                rl_controller_view.setVisibility(GONE);
+                showLoading();
+            }
 
-        // 创建带宽
-        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            @Override
+            public void onReady() {
+                Log.d("post", "准备播放");
+                isLoad = false;
+                dismissLoading();
+                //初始化播放点击事件并设置总时长
+                initPlayer();
+            }
 
-        // 创建轨道选择工厂
-        TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+            @Override
+            public void onPlayering(PlayerBean pb) {
+                Log.d("post", "播放中");
+                playerBean = pb;
+                handler.sendEmptyMessage(UPDATE_CURRNET_UI);
+            }
 
-        // 创建轨道选择器实例
-        TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+            @Override
+            public void onEnd() {
+                Log.d("post", "播放结束");
+                //回到开头
+                player.seekTo(0);
+                tv_bottom_curr_time.setText("00:00");
+                seekBar.setProgress(0);
+                btn_start_play.setImageResource(R.mipmap.exo_controls_play);
+            }
 
-        //step2. 创建播放器
-        player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+            @Override
+            public void onCatch() {
+                Log.d("post", "播放异常");
+                Toast.makeText(context, "网络状态差，请检查网络", Toast.LENGTH_SHORT).show();
+            }
 
-        //设置播放的view
-        player.setVideoSurfaceView(sv_player);
+            @Override
+            public void onError() {
+                Log.d("post", "播放错误");
+            }
 
+            @Override
+            public void onVolumes(int maxVolume, int currentVolume) {
+                ll_player_sys_set_state.setVisibility(VISIBLE);
+                tv_sys_type.setText("音量");
+                tv_sys_num.setText(StringUtils.onPercentage(currentVolume, maxVolume) + "%");
+                sb_sys_progress.setMax(maxVolume);
+                sb_sys_progress.setProgress(currentVolume);
+            }
+
+            @Override
+            public void onBrightness(int maxBrightness, int currentBrightness) {
+                ll_player_sys_set_state.setVisibility(VISIBLE);
+                tv_sys_type.setText("亮度");
+                tv_sys_num.setText(StringUtils.onPercentage(currentBrightness, maxBrightness) + "%");
+                sb_sys_progress.setMax(maxBrightness);
+                sb_sys_progress.setProgress(currentBrightness);
+            }
+
+            @Override
+            public void onProgress(long seekTimePosition, long duration, String seekTime, String totalTime) {
+                ll_player_player_progress.setVisibility(VISIBLE);
+                tv_player_progress_name.setText("进度");
+                tv_player_progress.setText(seekTime + "/" + totalTime);
+                sb_player_progress.setMax((int) duration);
+                sb_player_progress.setProgress((int) seekTimePosition);
+                updateData();
+            }
+
+            @Override
+            public void oEndGesture(GestureEnum state) {
+                ll_player_player_progress.setVisibility(GONE);
+                ll_player_sys_set_state.setVisibility(GONE);
+                switch (state) {
+                    case PROGRESS:
+                        startPlayer();
+                        break;
+                    case VOLUM:
+                        break;
+                    case BRIGHTNESS:
+                        break;
+                }
+            }
+        });
+        createPlayer();
+    }
+
+    /**
+     * 创建播放器
+     */
+    public void createPlayer() {
+        if (player.getPlayer() == null) {
+            player.createPlayer();
+        }
     }
 
     /**
      * 准备播放
      *
-     * @param playerBean 播放数据源
+     * @param playerBean 播放的实体
      */
     public void readyPlayer(PlayerBean playerBean) {
+        player.readyPlayer(playerBean);
         this.playerBean = playerBean;
-        //创建定时间监听播放状态
-        timerUtils = new TimerUtils(this, player, playerBean);
-        //先将定时器关闭
-//        timerUtils.stop();
-        // 测量播放带宽，如果不需要可以传null
-        DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-
-        // 创建加载数据的工厂
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
-                Util.getUserAgent(context, context.getPackageName()), bandwidthMeter);
-
-        // 创建解析数据的工厂
-        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-
-        // 传入Uri、加载数据的工厂、解析数据的工厂，就能创建出MediaSource
-        MediaSource videoSource = new ExtractorMediaSource(playerBean.getUri(),
-                dataSourceFactory, extractorsFactory, null, null);
-
-        // 添加数据源
-        player.prepare(videoSource);
-
-        // 设置播放进度
-        player.seekTo(playerBean.getCurrentPosition());
-
-        // 播放监听
-        player.addListener(eventListener);
-
         //设置标题
         tv_title.setText(playerBean.getInfo());
     }
 
-
     //开始播放
     public void startPlayer() {
-        if (player == null) {
-            return;
-        }
-        if (playerBean == null) {
-            return;
-        }
-        //开始监听
-        timerUtils.start();
-        player.setPlayWhenReady(true);
+        player.startPlayer();
         btn_start_play.setImageResource(R.mipmap.exo_controls_pause);
     }
 
-    /**
-     * 播放中
-     *
-     * @param playerBean 当前播放视频实体
-     */
-    @Override
-    public void playerRuning(PlayerBean playerBean) {
-        this.playerBean = playerBean;
-        handler.sendEmptyMessage(UPDATE_CURRNET_UI);
-    }
-
-
     //暂停播放
     public void pausePlayer() {
-        if (player == null) {
-            return;
-        }
-        if (timerUtils == null) {
-            return;
-        }
-        //终止监听
-        timerUtils.stop();
-        player.setPlayWhenReady(false);
+        player.pausePlayer();
         btn_start_play.setImageResource(R.mipmap.exo_controls_play);
     }
 
     //释放资源
     public void cancel() {
-        if (player == null) {
-            return;
-        }
-        if (timerUtils == null) {
-            return;
-        }
-        timerUtils.stop();
-        player.release();
-        player = null;
+        player.cancel();
     }
 
     /**
      * 再次回到此页面调用此方法
      */
     public void onResume() {
-        if (!isSucfare) {
-            return;
-        }
-        if (playerBean == null) {
-            return;
-        }
-        isSucfare = false;
-        createPlayer();
-        readyPlayer(playerBean);
-        if (playerBean.getCurrentPosition() >= playerBean.getDuration()) {
-            player.seekTo(playerBean.getDuration());
-            player.setPlayWhenReady(false);
-            timerUtils.stop();
-            btn_start_play.setImageResource(R.mipmap.exo_controls_play);
-            return;
-        }
-        player.seekTo(playerBean.getCurrentPosition());
-        player.setPlayWhenReady(false);
-        timerUtils.start();
+        player.onResume();
         btn_start_play.setImageResource(R.mipmap.exo_controls_play);
     }
 
@@ -295,23 +307,16 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
      * 页面切换调用此方法
      */
     public void onPause() {
-        isSucfare = true;
-        if (player == null) {
-            return;
-        }
-        if (timerUtils == null) {
-            return;
-        }
+        player.onPause();
         //更新界面
         btn_start_play.setImageResource(R.mipmap.exo_controls_play);
-        cancel();
     }
 
     /**
      * 展示loading
      */
     public void showLoading() {
-        if (rl_loading == null){
+        if (rl_loading == null) {
             rl_loading = view.findViewById(R.id.rl_loading);
         }
         if (iv_loading == null) {
@@ -323,7 +328,7 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
 
     //隐藏loading
     public void dismissLoading() {
-        if (rl_loading == null){
+        if (rl_loading == null) {
             return;
         }
         rl_loading.setVisibility(GONE);
@@ -333,17 +338,19 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     private void initPlayer() {
         //初始化界面UI
         //当前的播放时间
-        tv_bottom_curr_time.setText(playerBean.getCurrentTime() + "");
+        tv_bottom_curr_time.setText(StringUtils.onFormatTime(playerBean.getCurrentPosition()));
         //当前视频的总时长
-        tv_bottom_end_time.setText(String.valueOf(player.getDuration() / 1000));
+        tv_bottom_end_time.setText(StringUtils.onFormatTime(playerBean.getDuration()));
+        seekBar.setMax((int) playerBean.getDuration());
         //当前进度条
-        seekBar.setProgress(playerBean.getCurrentProgress());
+        seekBar.setProgress((int) playerBean.getCurrentPosition());
         //当前缓冲进度条
-        seekBar.setSecondaryProgress(playerBean.getSecondProgress());
+        seekBar.setSecondaryProgress(playerBean.getBufferedPercentage());
         //监听进度条
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                tv_bottom_curr_time.setText(StringUtils.onFormatTime(seekBar.getProgress()));
             }
 
             @Override
@@ -353,19 +360,24 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                player.seekTo(seekBar.getProgress() * (player.getDuration() / 100));
-                int currentTime = (int) (player.getCurrentPosition() / 1000);
-                int currentProgress = (int) (new BigDecimal((float) player.getCurrentPosition() / player.getDuration()).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue() * 100);
-                int secondProgressPer = player.getBufferedPercentage();
-                playerBean.setCurrentTime(currentTime);
-                playerBean.setCurrentProgress(currentProgress);
-                playerBean.setSecondProgress(secondProgressPer);
-                playerBean.setCurrentPosition(player.getCurrentPosition());
-                playerBean.setDuration(player.getDuration());
+                player.seekTo(seekBar.getProgress());
+                updateData();
                 startPlayer();
             }
         });
     }
+
+    /**
+     * 更新当前实体的数据
+     */
+    private void updateData() {
+        playerBean.setCurrentTime(StringUtils.onFormatTime(player.getCurrentPosition()));
+        playerBean.setEndTime(StringUtils.onFormatTime(player.getDuration()));
+        playerBean.setCurrentPosition(player.getCurrentPosition());
+        playerBean.setBufferedPercentage(player.getBufferedPercentage());
+        playerBean.setDuration(player.getDuration());
+    }
+
 
     //开启线程读取进度
     private Handler handler = new Handler() {
@@ -377,10 +389,11 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
                 case UPDATE_CURRNET_UI:
                     //更新当前时间
                     tv_bottom_curr_time.setText(String.valueOf(playerBean.getCurrentTime()));
+                    seekBar.setMax((int) playerBean.getDuration());
                     //更新当前进度条
-                    seekBar.setProgress(playerBean.getCurrentProgress());
+                    seekBar.setProgress((int) playerBean.getCurrentPosition());
                     //更新当前缓冲进度条
-                    seekBar.setSecondaryProgress(playerBean.getSecondProgress());
+                    seekBar.setSecondaryProgress(playerBean.getBufferedPercentage());
                     break;
             }
         }
@@ -390,6 +403,7 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_start_play:
+                //播放按钮
                 if (player == null) {
                     return;
                 }
@@ -400,7 +414,7 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
                 pausePlayer();
                 break;
             case R.id.btn_bottom_full_screen:
-            case R.id.img_back:
+                //横竖屏
                 //int ORIENTATION_PORTRAIT = 1;  竖屏
                 //int ORIENTATION_LANDSCAPE = 2; 横屏
                 int screenNum = getResources().getConfiguration().orientation;
@@ -412,13 +426,24 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
                 //切换成横屏
                 ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 break;
+            case R.id.img_back:
+                //左上角返回键
+                int screenNum1 = getResources().getConfiguration().orientation;
+                if (screenNum1 == 2) {
+                    //切换成竖屏
+                    ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    return;
+                }
+                break;
             case R.id.rl_controller_view:
+                //整个播放器的控制层view
                 if (isLoad) {
                     return;
                 }
                 rl_controller_view.setVisibility(GONE);
                 break;
             case R.id.sv_player:
+                //播放器view
                 if (isLoad) {
                     return;
                 }
@@ -450,122 +475,6 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         params.height = DimenUtils.dip2px(context, 300);
         rl_player_view.setLayoutParams(params);
     }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        //将触摸事件交给GestureDetector来处理
-        return gestureDetector.onTouchEvent(event);
-    }
-
-    //手势监听
-    private class PlayerGestureListener extends GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onDoubleTap(MotionEvent e) {
-            Log.d("post","onDoubleTap");
-            return true;
-        }
-
-        @Override
-        public boolean onDown(MotionEvent e) {
-            Log.d("post","onDown");
-            return super.onDown(e);
-        }
-
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            Log.d("post","e1:"+e1.getAction()+"");
-            Log.d("post","e2:"+e2.getAction()+"");
-            Log.d("post","distanceX:"+distanceX);
-            Log.d("post","distanceY:"+distanceY);
-            return super.onScroll(e1, e2, distanceX, distanceY);
-        }
-    }
-
-    //播放监听
-    ExoPlayer.EventListener eventListener = new ExoPlayer.EventListener() {
-        @Override
-        public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
-            Log.d("post", "播放: onTimelineChanged 周期总数 " + timeline);
-        }
-
-        @Override
-        public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-            Log.d("post", "播放: TrackGroupArray ");
-        }
-
-        @Override
-        public void onLoadingChanged(boolean isLoading) {
-            Log.d("post", "播放: onLoadingChanged " + isLoading);
-        }
-
-        /**
-         * 视频的播放状态
-         * STATE_IDLE 播放器空闲，既不在准备也不在播放
-         * STATE_PREPARING 播放器正在准备
-         * STATE_BUFFERING 播放器已经准备完毕，但无法立即播放。此状态的原因有很多，但常见的是播放器需要缓冲更多数据才能开始播放
-         * STATE_ENDED 播放已完毕
-         */
-        @Override
-        public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-            switch (playbackState) {
-                case Player.STATE_BUFFERING:
-                    //缓冲中展示loading
-                    isLoad = true;
-                    rl_controller_view.setVisibility(GONE);
-                    showLoading();
-                    Log.d("post", "STATE_BUFFERING");
-                    break;
-                case Player.STATE_ENDED:
-                    Log.d("post", "STATE_ENDED");
-                    timerUtils.stop();
-                    btn_start_play.setImageResource(R.mipmap.exo_controls_pause);
-                    break;
-                case Player.STATE_IDLE:
-                    Log.d("post", "STATE_IDLE:网络状态差，请检查网络。。。");
-                    Toast.makeText(context, "网络状态差，请检查网络", Toast.LENGTH_SHORT).show();
-                    break;
-                case Player.STATE_READY:
-                    Log.d("post", "STATE_READY：" + player.getNextWindowIndex());
-                    isLoad = false;
-                    dismissLoading();
-                    //初始化播放点击事件并设置总时长
-                    initPlayer();
-                    break;
-
-            }
-        }
-
-        @Override
-        public void onRepeatModeChanged(int repeatMode) {
-            Log.d("post", "播放状态: onRepeatModeChanged");
-        }
-
-        @Override
-        public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-            Log.d("post", "播放状态: onShuffleModeEnabledChanged");
-        }
-
-        @Override
-        public void onPlayerError(ExoPlaybackException error) {
-            Log.d("post", "播放: onPlayerError  ");
-            timerUtils.stop();
-        }
-
-        @Override
-        public void onPositionDiscontinuity(int reason) {
-            Log.d("post", "播放: onPositionDiscontinuity  " + reason);
-        }
-
-        @Override
-        public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-            Log.d("post", "播放状态: onPlaybackParametersChanged");
-        }
-
-        @Override
-        public void onSeekProcessed() {
-            Log.d("post", "播放状态: onSeekProcessed");
-        }
-    };
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == event.KEYCODE_BACK) {

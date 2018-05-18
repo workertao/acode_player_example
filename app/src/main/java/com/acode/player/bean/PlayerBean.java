@@ -24,16 +24,10 @@ public class PlayerBean implements Serializable {
     private String imgUrl;
 
     //视频的当前播放时间
-    private int currentTime;
+    private String currentTime;
 
     //视频的总时长
-    private int endTime;
-
-    //视频的进度条当前进度
-    private int currentProgress;
-
-    //视频的进度条当前缓冲进度
-    private int secondProgress;
+    private String endTime;
 
     //视频的上传地址
     private String url;
@@ -45,6 +39,8 @@ public class PlayerBean implements Serializable {
     private long currentPosition;
     //当前视频的总长度
     private long duration;
+    //当前视频的缓冲进度
+    private int bufferedPercentage;
 
     @Override
     public String toString() {
@@ -55,13 +51,21 @@ public class PlayerBean implements Serializable {
                 ", imgUrl='" + imgUrl + '\'' +
                 ", currentTime=" + currentTime +
                 ", endTime=" + endTime +
-                ", currentProgress=" + currentProgress +
-                ", secondProgress=" + secondProgress +
                 ", url='" + url + '\'' +
                 ", uploadProgress=" + uploadProgress +
                 ", currentPosition=" + currentPosition +
                 ", duration=" + duration +
+                ", bufferedPercentage=" + bufferedPercentage +
                 '}';
+    }
+
+    public int getBufferedPercentage() {
+        return bufferedPercentage;
+    }
+
+    public PlayerBean setBufferedPercentage(int bufferedPercentage) {
+        this.bufferedPercentage = bufferedPercentage;
+        return this;
     }
 
     public long getDuration() {
@@ -118,39 +122,21 @@ public class PlayerBean implements Serializable {
         return this;
     }
 
-    public int getCurrentTime() {
+    public String getCurrentTime() {
         return currentTime;
     }
 
-    public PlayerBean setCurrentTime(int currentTime) {
+    public PlayerBean setCurrentTime(String currentTime) {
         this.currentTime = currentTime;
         return this;
     }
 
-    public int getEndTime() {
+    public String getEndTime() {
         return endTime;
     }
 
-    public PlayerBean setEndTime(int endTime) {
+    public PlayerBean setEndTime(String endTime) {
         this.endTime = endTime;
-        return this;
-    }
-
-    public int getCurrentProgress() {
-        return currentProgress;
-    }
-
-    public PlayerBean setCurrentProgress(int currentProgress) {
-        this.currentProgress = currentProgress;
-        return this;
-    }
-
-    public int getSecondProgress() {
-        return secondProgress;
-    }
-
-    public PlayerBean setSecondProgress(int secondProgress) {
-        this.secondProgress = secondProgress;
         return this;
     }
 
@@ -170,13 +156,5 @@ public class PlayerBean implements Serializable {
     public PlayerBean setUploadProgress(int uploadProgress) {
         this.uploadProgress = uploadProgress;
         return this;
-    }
-    public void reset(){
-        currentTime = 0;
-        endTime = 0;
-        currentPosition = 0;
-        duration = 0;
-        currentProgress = 0;
-        secondProgress = 0;
     }
 }

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_player_player_progress"
+    android:layout_width="120dp"
+    android:layout_height="120dp"
+    android:layout_gravity="center"
+    android:background="#80000000"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:visibility="gone">
+
+    <TextView
+        android:id="@+id/tv_player_progress_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="进度"
+        android:textColor="#fff"
+        android:textSize="16dp" />
+
+    <TextView
+        android:id="@+id/tv_player_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:00/00:00"
+        android:textColor="#fff"
+        android:textSize="16dp" />
+
+    <SeekBar
+        android:id="@+id/sb_player_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_toLeftOf="@+id/tv_bottom_end_time"
+        android:layout_toRightOf="@+id/tv_bottom_curr_time"
+        android:indeterminate="false"
+        android:max="100"
+        android:maxHeight="1dp"
+        android:minHeight="1dp"
+        android:progress="0"
+        android:progressDrawable="@drawable/layer_progress_bar"
+        android:secondaryProgress="0"
+        android:thumb="@drawable/drawable_progress_thumb" />
+
+</LinearLayout>

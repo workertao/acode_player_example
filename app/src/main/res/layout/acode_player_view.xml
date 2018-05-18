@@ -111,9 +111,9 @@
         <RelativeLayout
             android:id="@+id/rl_loading"
             android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:background="#00000000"
-            android:visibility="gone"
-            android:layout_height="match_parent">
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/iv_loading"
@@ -121,8 +121,11 @@
                 android:layout_height="50dp"
                 android:layout_centerInParent="true"
                 android:layout_gravity="center"
-                android:background="@drawable/loading"
-                 />
+                android:background="@drawable/loading" />
         </RelativeLayout>
+        <!--音量和亮度调节的view-->
+        <include layout="@layout/include_sys_set" />
+        <!--滑动进度调节view-->
+        <include layout="@layout/include_player_progress" />
     </FrameLayout>
 </LinearLayout>

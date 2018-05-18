@@ -19,10 +19,8 @@ public class Data {
         for (int i = 0; i < 3; i++) {
             PlayerBean playerBean = new PlayerBean();
             playerBean.setUrl("");
-            playerBean.setCurrentTime(0);
-            playerBean.setEndTime(0);
-            playerBean.setCurrentProgress(0);
-            playerBean.setSecondProgress(0);
+            playerBean.setCurrentTime("00:00");
+            playerBean.setEndTime("00:00");
             playerBean.setUploadProgress(0);
             if (i == 0) {
                 playerBean.setTitle("小神龙");

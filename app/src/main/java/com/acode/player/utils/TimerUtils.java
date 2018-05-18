@@ -2,12 +2,11 @@ package com.acode.player.utils;
 
 import android.util.Log;
 
-import com.acode.player.AcodePlayerStateListener;
+import com.acode.player.listener.AcodePlayerStateListener;
 import com.acode.player.Config;
 import com.acode.player.bean.PlayerBean;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 
-import java.math.BigDecimal;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -54,9 +53,12 @@ public class TimerUtils {
 
 
     class MyTimerTask extends TimerTask {
-
         @Override
         public void run() {
+            Log.d("post","timerTask:"+timerTask+"     timer:"+timer);
+            if (timerTask == null || timer==null){
+                return;
+            }
             if (acodePlayerStateListener == null) {
                 return;
             }
@@ -64,20 +66,12 @@ public class TimerUtils {
                 stop();
                 return;
             }
-            int currentTime = (int) (player.getCurrentPosition() / 1000);
-            int eachProgress = (int) (player.getDuration() / 100);
-            int currentProgress = (int) ((player.getContentPosition() / eachProgress));
-            int secondProgressPer = player.getBufferedPercentage();
-            playerBean.setCurrentTime(currentTime);
-            playerBean.setCurrentProgress(currentProgress);
-            playerBean.setSecondProgress(secondProgressPer);
+            playerBean.setCurrentTime(StringUtils.onFormatTime(player.getCurrentPosition()));
             playerBean.setCurrentPosition(player.getCurrentPosition());
+            playerBean.setBufferedPercentage(player.getBufferedPercentage());
             playerBean.setDuration(player.getDuration());
-            if (currentProgress < 100) {
-                acodePlayerStateListener.playerRuning(playerBean);
-                return;
-            }
-            stop();
+            playerBean.setEndTime(StringUtils.onFormatTime(player.getDuration()));
+            acodePlayerStateListener.playerRuning(playerBean);
         }
     }
 }
