@@ -8,12 +8,12 @@
     android:orientation="vertical"
     tools:context="com.acode.player.MainActivity">
 
-    <com.acode.player.AcodePlayerView
+    <com.acode.player.lib.AcodePlayerView
         android:id="@+id/acodePlayerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-    </com.acode.player.AcodePlayerView>
+    </com.acode.player.lib.AcodePlayerView>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -28,13 +28,13 @@
                 android:id="@+id/btn_intent"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:text="跳转" />
+                android:text="测试跳转" />
 
             <Button
                 android:id="@+id/btn"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:text="获取本地视频列表" />
+                android:text="获取视频列表" />
 
             <LinearLayout
                 android:id="@+id/ll_video_files_root"

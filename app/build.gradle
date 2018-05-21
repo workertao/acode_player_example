@@ -37,5 +37,5 @@ dependencies {
     //系统状态栏
     compile 'com.readystatesoftware.systembartint:systembartint:1.0.3'
 
-    compile 'com.github.hackware1993:MagicIndicator:1.5.0'
+
 }

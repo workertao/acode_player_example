@@ -2,6 +2,7 @@ package com.acode.player;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
@@ -13,18 +14,19 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.acode.player.base.TestActivity;
-import com.acode.player.bean.PlayerBean;
-import com.acode.player.data.Data;
+import com.acode.player.lib.AcodePlayerView;
+import com.acode.player.lib.bean.PlayerBean;
+import com.acode.player.lib.data.Data;
+import com.acode.player.lib.tablayout.TestActivity;
+import com.acode.player.lib.utils.NetUtils;
 import com.acode.player.lib.utils.PermissionUtils;
-import com.acode.player.utils.NetUtils;
 
 public class MainActivity extends AcodeBaseActivity {
     public static String TAG = "MainActivity";
     private final int PERMISSION_REQ_CODE = 100;
     //获取本地视频列表
     private Button btn;
-
+    //跳转测试
     private Button btn_intent;
 
     private LinearLayout ll_video_files_root;
@@ -33,7 +35,8 @@ public class MainActivity extends AcodeBaseActivity {
 
     private AcodePlayerView acodePlayerView;
 
-    private NetUtils netUtils;
+    //是否是首次加载
+    private boolean isFirst = true;
 
 
     @Override
@@ -41,30 +44,8 @@ public class MainActivity extends AcodeBaseActivity {
         Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initNet();
         initView();
         initData();
-    }
-
-    private void initNet() {
-        netUtils = new NetUtils(this);
-        netUtils.setOnNetBackListener(new NetUtils.OnNetBackListener() {
-            @Override
-            public void onNetWork(int type) {
-                switch (type) {
-                    case NetUtils.TYPE_NONE:
-                        Toast.makeText(MainActivity.this, "没网络", Toast.LENGTH_SHORT).show();
-                        break;
-                    case NetUtils.TYPE_WIFI:
-                        Toast.makeText(MainActivity.this, "wifi网络", Toast.LENGTH_SHORT).show();
-                        break;
-                    case NetUtils.TYPE_MOBILE:
-                        Toast.makeText(MainActivity.this, "移动网络", Toast.LENGTH_SHORT).show();
-                        break;
-                }
-            }
-        });
-        netUtils.registerReceiverNet();
     }
 
     private void initData() {
@@ -75,9 +56,15 @@ public class MainActivity extends AcodeBaseActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        //遍历循环查看用户是否授权，如果有一个没有授权就return
+        for (int i = 0; i < grantResults.length; i++) {
+            if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+        }
         switch (requestCode) {
             case PERMISSION_REQ_CODE:
-
+                initPlaybeanData();
                 break;
         }
     }
@@ -90,19 +77,11 @@ public class MainActivity extends AcodeBaseActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ll_video_files_root.removeAllViews();
-                for (final PlayerBean playerBean : Data.getPlayerBeans()) {
-                    Button button = new Button(MainActivity.this);
-                    button.setText(playerBean.getTitle());
-                    ll_video_files_root.addView(button);
-                    button.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            acodePlayerView.pausePlayer();
-                            acodePlayerView.readyPlayer(playerBean);
-                        }
-                    });
+                boolean isTrue = permissionUtils.requestPermission(PERMISSION_REQ_CODE, permissionUtils.request_permission);
+                if (!isTrue) {
+                    return;
                 }
+                initPlaybeanData();
             }
         });
         btn_intent.setOnClickListener(new View.OnClickListener() {
@@ -111,6 +90,27 @@ public class MainActivity extends AcodeBaseActivity {
                 startActivity(new Intent(MainActivity.this, TestActivity.class));
             }
         });
+    }
+
+    //初始化数据
+    public void initPlaybeanData() {
+        ll_video_files_root.removeAllViews();
+        for (final PlayerBean playerBean : Data.getPlayerBeans()) {
+            Button button = new Button(MainActivity.this);
+            button.setText(playerBean.getTitle());
+            ll_video_files_root.addView(button);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isFirst) {
+                        acodePlayerView.showLoading();
+                        isFirst = false;
+                    }
+                    acodePlayerView.pausePlayer();
+                    acodePlayerView.readyPlayer(playerBean);
+                }
+            });
+        }
     }
 
     @Override
@@ -141,7 +141,7 @@ public class MainActivity extends AcodeBaseActivity {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        Log.d("post", "横竖屏切换");
+        Log.d(TAG, "横竖屏切换");
         acodePlayerView.onConfigurationChanged(newConfig.orientation);
         super.onConfigurationChanged(newConfig);
     }
@@ -149,27 +149,24 @@ public class MainActivity extends AcodeBaseActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.d(TAG,"onRestart");
+        Log.d(TAG, "onRestart");
     }
 
     @Override
     protected void onDestroy() {
-        Log.d(TAG,"onDestroy");
+        Log.d(TAG, "onDestroy");
         if (acodePlayerView != null) {
             acodePlayerView.cancel();
-        }
-        if (netUtils != null) {
-            netUtils.unNetworkBroadcastReceiver();
         }
         super.onDestroy();
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (acodePlayerView ==  null){
+        if (acodePlayerView == null) {
             return super.onKeyDown(keyCode, event);
         }
-        return acodePlayerView.onKeyDown(keyCode,event);
+        return acodePlayerView.onKeyDown(keyCode, event);
     }
 
     /**

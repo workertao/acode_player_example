@@ -32,13 +32,8 @@ dependencies {
     })
     //解决65535方法数
     compile 'com.android.support:multidex:1.0.1'
-//    compile 'com.google.android.exoplayer:exoplayer:r2.X.X'
-//    implementation 'com.google.android.exoplayer:exoplayer:2.2.0'
-
-    // ExoPlayer
-//    api "com.google.android.exoplayer:exoplayer-core:$rootProject.ext.exoPlayerVersion"
-//    api "com.google.android.exoplayer:exoplayer-dash:$rootProject.ext.exoPlayerVersion"
-//    api "com.google.android.exoplayer:exoplayer-hls:$rootProject.ext.exoPlayerVersion"
-//    api "com.google.android.exoplayer:exoplayer-smoothstreaming:$rootProject.ext.exoPlayerVersion"
+    //exoplayer
     compile 'com.google.android.exoplayer:exoplayer:2.7.3'
+    //tablayout
+    compile 'com.github.hackware1993:MagicIndicator:1.5.0'
 }

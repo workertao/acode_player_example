@@ -23,8 +23,6 @@ import java.util.List;
 public class PermissionUtils {
 
     public String[] request_permission = new String[]{
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET};
 
     public int requestPermissionCount = 1;

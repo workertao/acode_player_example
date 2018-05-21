@@ -21,8 +21,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".base.TestActivity" />
-        <activity android:name=".base.FuckActivity" />
     </application>
 
 </manifest>
