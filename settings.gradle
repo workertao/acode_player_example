@@ -1,1 +1,1 @@
-include ':app', ':acode_player_lib'
+include ':app', ':acode_player_lib', ':test'
