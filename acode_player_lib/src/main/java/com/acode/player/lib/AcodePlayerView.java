@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.acode.player.R;
 import com.acode.player.lib.anim.AnimUtils;
 import com.acode.player.lib.bean.PlayerBean;
+import com.acode.player.lib.data.Config;
 import com.acode.player.lib.listener.AcodePlayerListener;
 import com.acode.player.lib.utils.DimenUtils;
 import com.acode.player.lib.utils.GestureEnum;
@@ -42,8 +43,6 @@ import com.acode.player.lib.utils.StringUtils;
  * introduce:播放器
  */
 public class AcodePlayerView extends FrameLayout implements View.OnClickListener {
-    //更新当前时间和进度条
-    private final int UPDATE_CURRNET_UI = 1000;
     private Context context;
     //视频中间的播放按钮
     private ImageView btn_start_play;
@@ -64,8 +63,6 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     //定时监听播放状态
     //播放实体类
     private PlayerBean playerBean;
-    //记录是不是页面切换
-    private boolean isSucfare;
     //loading
     private ImageView iv_loading;
     //播放器
@@ -235,7 +232,7 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
             public void onPlayering(PlayerBean pb) {
                 Log.d("post", "播放中");
                 playerBean = pb;
-                handler.sendEmptyMessage(UPDATE_CURRNET_UI);
+                handler.sendEmptyMessage(Config.UPDATE_CURRNET_UI);
             }
 
             @Override
@@ -290,7 +287,6 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
                 ll_player_sys_set_state.setVisibility(GONE);
                 switch (state) {
                     case PROGRESS:
-                        startPlayer();
                         break;
                     case VOLUM:
                         break;
@@ -437,7 +433,7 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
             super.handleMessage(msg);
             //如果是播放状态  去更新进度条and当前的时间
             switch (msg.what) {
-                case UPDATE_CURRNET_UI:
+                case Config.UPDATE_CURRNET_UI:
                     //更新当前时间
                     tv_bottom_curr_time.setText(String.valueOf(playerBean.getCurrentTime()));
                     seekBar.setMax((int) playerBean.getDuration());

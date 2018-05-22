@@ -37,10 +37,11 @@ public class TimerUtils {
 
 
     public void start() {
-        if (timer==null){
+//        滑动改变进度条崩溃
+        if (timer == null) {
             timer = new Timer(true);
         }
-        if (timerTask == null){
+        if (timerTask == null) {
             timerTask = new MyTimerTask();
         }
         timer.schedule(timerTask, Config.firstStart, Config.secondStart);
@@ -61,8 +62,8 @@ public class TimerUtils {
     class MyTimerTask extends TimerTask {
         @Override
         public void run() {
-            Log.d("post","timerTask:"+timerTask+"     timer:"+timer);
-            if (timerTask == null || timer==null){
+            Log.d("post", "timerTask:" + timerTask + "     timer:" + timer);
+            if (timerTask == null || timer == null) {
                 stop();
                 return;
             }
