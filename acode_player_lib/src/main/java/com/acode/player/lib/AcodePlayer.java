@@ -420,6 +420,8 @@ public class AcodePlayer implements AcodePlayerStateListener, View.OnTouchListen
 
     //手势监听
     private class PlayerGestureListener extends GestureDetector.SimpleOnGestureListener {
+        private boolean firstTouch;
+        private boolean toSeek;
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             Log.d("post", "onDoubleTap");
@@ -429,6 +431,7 @@ public class AcodePlayer implements AcodePlayerStateListener, View.OnTouchListen
         @Override
         public boolean onDown(MotionEvent e) {
             Log.d("post", "onDown");
+            firstTouch = true;
             return super.onDown(e);
         }
 
@@ -438,10 +441,13 @@ public class AcodePlayer implements AcodePlayerStateListener, View.OnTouchListen
             //e2当前的MOVE事件
             //distanceX当前MOVE事件
             //distanceY上一个MOVE事件的位移量
-            //区分是不是滑动调节进度
-            boolean toSeek = Math.abs(distanceX) >= Math.abs(distanceY);
+            if (firstTouch) {
+                toSeek = Math.abs(distanceX) >= Math.abs(distanceY);
+                firstTouch = false;
+            }
             //获取本次X轴的偏移量
             float differX = e1.getX() - e2.getX();
+            //区分是不是滑动调节进度
             if (toSeek) {
                 differX = -differX;
                 long position = player.getCurrentPosition();
