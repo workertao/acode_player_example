@@ -97,6 +97,12 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     private LinearLayout ll_network_no_found;
     //网络监测工具类
     private NetUtils netUtils;
+    //超清清
+    private TextView tv_super_clear;
+    //高清
+    private TextView tv_hight_clear;
+    //标清
+    private TextView tv_standard_clear;
 
 
     public AcodePlayerView(@NonNull Context context) {
@@ -173,6 +179,9 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
 
     //初始化播放器的布局
     private void initPlayerView() {
+        tv_super_clear = view.findViewById(R.id.tv_super_clear);
+        tv_hight_clear = view.findViewById(R.id.tv_hight_clear);
+        tv_standard_clear = view.findViewById(R.id.tv_standard_clear);
         rl_player_view = view.findViewById(R.id.rl_player_view);
         img_back = view.findViewById(R.id.img_back);
         tv_title = view.findViewById(R.id.tv_title);
@@ -207,6 +216,9 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         rl_controller_view.setOnClickListener(this);
         sv_player.setOnClickListener(this);
         img_back.setOnClickListener(this);
+        tv_super_clear.setOnClickListener(this);
+        tv_hight_clear.setOnClickListener(this);
+        tv_standard_clear.setOnClickListener(this);
     }
 
     private void initData() {
@@ -311,9 +323,22 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
      * 准备播放
      *
      * @param playerBean 播放的实体
+     *                   默认播放路线
      */
     public void readyPlayer(PlayerBean playerBean) {
         player.readyPlayer(playerBean);
+        this.playerBean = playerBean;
+        //设置标题
+        tv_title.setText(playerBean.getInfo());
+    }
+    /**
+     * 准备播放
+     *
+     * @param playerBean 播放的实体
+     *                   设置播放路线
+     */
+    public void readyPlayer(PlayerBean playerBean,int line) {
+        player.readyPlayer(playerBean,line);
         this.playerBean = playerBean;
         //设置标题
         tv_title.setText(playerBean.getInfo());
@@ -495,6 +520,15 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
                 return;
             }
             rl_controller_view.setVisibility(VISIBLE);
+        } else if (i == R.id.tv_super_clear) {
+            pausePlayer();
+            readyPlayer(playerBean,Config.SUPER_CLEAR);
+        } else if (i == R.id.tv_hight_clear) {
+            pausePlayer();
+            readyPlayer(playerBean,Config.HIGHT_CLEAR);
+        } else if (i == R.id.tv_standard_clear) {
+            pausePlayer();
+            readyPlayer(playerBean,Config.STARTMD_CLEAR);
         }
     }
 

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.acode.player.lib.bean.PlayerBean;
+import com.acode.player.lib.data.Config;
 import com.acode.player.lib.listener.AcodePlayerListener;
 import com.acode.player.lib.listener.AcodePlayerStateListener;
 import com.acode.player.lib.utils.GestureEnum;
@@ -166,8 +168,20 @@ public class AcodePlayer implements AcodePlayerStateListener, View.OnTouchListen
      * 准备播放
      *
      * @param playerBean 播放数据源
+     *                   默认播放标清
      */
     public void readyPlayer(PlayerBean playerBean) {
+        readyPlayer(playerBean, Config.STARTMD_CLEAR);
+
+    }
+
+    /**
+     * 准备播放
+     *
+     * @param playerBean 播放数据源
+     *                   设置播放线路
+     */
+    public void readyPlayer(PlayerBean playerBean, int lins) {
         this.playerBean = playerBean;
         if (timerUtils != null) {
             timerUtils.stop();
@@ -175,6 +189,27 @@ public class AcodePlayer implements AcodePlayerStateListener, View.OnTouchListen
         }
         //创建定时间监听播放状态
         timerUtils = new TimerUtils(this, player, playerBean);
+        Uri uri = null;
+        for (int i = 0; i < playerBean.getUris().size(); i++) {
+            if (lins == playerBean.getLineNames().get(i)) {
+                uri = playerBean.getUris().get(i);
+            }
+        }
+        //初始化数据源
+        MediaSource mediaSource = initMediaSource(uri);
+        // 添加数据源
+        player.prepare(mediaSource);
+
+        // 设置播放进度
+        player.seekTo(playerBean.getCurrentPosition());
+
+        // 播放监听
+        player.addListener(eventListener);
+    }
+
+
+    //初始化数据源
+    private MediaSource initMediaSource(Uri uri) {
         // 测量播放带宽，如果不需要可以传null
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
 
@@ -186,17 +221,9 @@ public class AcodePlayer implements AcodePlayerStateListener, View.OnTouchListen
         ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
 
         // 传入Uri、加载数据的工厂、解析数据的工厂，就能创建出MediaSource
-        MediaSource videoSource = new ExtractorMediaSource(playerBean.getUri(),
+        MediaSource videoSource = new ExtractorMediaSource(uri,
                 dataSourceFactory, extractorsFactory, null, null);
-
-        // 添加数据源
-        player.prepare(videoSource);
-
-        // 设置播放进度
-        player.seekTo(playerBean.getCurrentPosition());
-
-        // 播放监听
-        player.addListener(eventListener);
+        return videoSource;
     }
 
     //播放监听
@@ -422,6 +449,7 @@ public class AcodePlayer implements AcodePlayerStateListener, View.OnTouchListen
     private class PlayerGestureListener extends GestureDetector.SimpleOnGestureListener {
         private boolean firstTouch;
         private boolean toSeek;
+
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             Log.d("post", "onDoubleTap");

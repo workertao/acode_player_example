@@ -13,4 +13,11 @@ public class Config {
     public static final int secondStart = 500;
     //更新当前时间和进度条
     public static final int UPDATE_CURRNET_UI = 1000;
+    //超清
+    public static final int SUPER_CLEAR = 1080;
+    //高清
+    public static final int HIGHT_CLEAR = 720;
+    //标清
+    public static final int STARTMD_CLEAR = 560;
+
 }

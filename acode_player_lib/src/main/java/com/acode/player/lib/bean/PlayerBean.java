@@ -3,6 +3,7 @@ package com.acode.player.lib.bean;
 import android.net.Uri;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * user:yangtao
@@ -11,8 +12,11 @@ import java.io.Serializable;
  * introduce:视频实体
  */
 public class PlayerBean implements Serializable {
-    //视频的uri
-    private Uri uri;
+    //视频的uri集合
+    private ArrayList<Uri> uris;
+
+    //线路集合
+    private ArrayList<Integer> lineNames;
 
     //视频名称
     private String title;
@@ -45,8 +49,9 @@ public class PlayerBean implements Serializable {
     @Override
     public String toString() {
         return "PlayerBean{" +
-                "uri=" + uri +
                 ", title='" + title + '\'' +
+                ", uris='" + uris.toString() + '\'' +
+                ", lineNames='" + lineNames.toString() + '\'' +
                 ", info='" + info + '\'' +
                 ", imgUrl='" + imgUrl + '\'' +
                 ", currentTime=" + currentTime +
@@ -57,6 +62,25 @@ public class PlayerBean implements Serializable {
                 ", duration=" + duration +
                 ", bufferedPercentage=" + bufferedPercentage +
                 '}';
+    }
+
+
+    public ArrayList<Integer> getLineNames() {
+        return lineNames;
+    }
+
+    public PlayerBean setLineNames(ArrayList<Integer> lineNames) {
+        this.lineNames = lineNames;
+        return this;
+    }
+
+    public ArrayList<Uri> getUris() {
+        return uris;
+    }
+
+    public PlayerBean setUris(ArrayList<Uri> uris) {
+        this.uris = uris;
+        return this;
     }
 
     public int getBufferedPercentage() {
@@ -110,15 +134,6 @@ public class PlayerBean implements Serializable {
 
     public PlayerBean setImgUrl(String imgUrl) {
         this.imgUrl = imgUrl;
-        return this;
-    }
-
-    public Uri getUri() {
-        return uri;
-    }
-
-    public PlayerBean setUri(Uri uri) {
-        this.uri = uri;
         return this;
     }
 

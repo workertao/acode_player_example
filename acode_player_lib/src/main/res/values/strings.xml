@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">acode_player_lib</string>
+    <string name="uri_test_7">http://mp4.vjshi.com/2017-04-14/933db6540f53dd38974b4446388fb928.mp4</string>
+    <string name="uri_test_8">http://mp4.vjshi.com/2016-10-21/84bafe60ef0af95a5292f66b9f692504.mp4</string>
+    <string name="uri_test_9">http://mp4.vjshi.com/2015-05-11/1431320221859_786.mp4</string>
 </resources>
