@@ -1,9 +1,11 @@
-package com.acode.player.lib.tablayout;
+package com.acode.player.listplayer;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
+import android.view.KeyEvent;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import com.acode.player.R;
 
@@ -13,8 +15,7 @@ import com.acode.player.R;
  * email:yangtao@bjxmail.com
  * introduce:test
  */
-public class TestActivity extends FragmentActivity {
-    private FrameLayout fram;
+public class ListPlayerActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -25,7 +26,6 @@ public class TestActivity extends FragmentActivity {
     }
 
     private void initView() {
-        fram = findViewById(R.id.fram);
     }
 
     private void initData() {
@@ -35,4 +35,9 @@ public class TestActivity extends FragmentActivity {
                 .commitAllowingStateLoss();
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        CircleFragment circleFragment = (CircleFragment) getSupportFragmentManager().findFragmentByTag(CircleFragment.class.getSimpleName());
+        return circleFragment.onKeyDown(keyCode, event);
+    }
 }

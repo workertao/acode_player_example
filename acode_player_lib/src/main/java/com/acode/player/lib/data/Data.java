@@ -25,57 +25,57 @@ public class Data {
             if (i == 0) {
                 playerBean.setTitle("小神龙");
                 playerBean.setInfo("小神龙谈父亲");
-                ArrayList<Uri> uris = new ArrayList<>();
-                uris.add(Uri.parse("http://oif1jvh5f.bkt.clouddn.com/tmp.mp4"));
-                uris.add(Uri.parse("http://oif1jvh5f.bkt.clouddn.com/tmp.mp4"));
-                uris.add(Uri.parse("http://oif1jvh5f.bkt.clouddn.com/tmp.mp4"));
-                playerBean.setUris(uris);
-                ArrayList<Integer> linsNames = new ArrayList<>();
-                linsNames.add(1080);
-                linsNames.add(720);
-                linsNames.add(560);
+                ArrayList<String> uris = new ArrayList<>();
+                uris.add("http://oif1jvh5f.bkt.clouddn.com/tmp.mp4");
+                uris.add("http://oif1jvh5f.bkt.clouddn.com/tmp.mp4");
+                uris.add("http://oif1jvh5f.bkt.clouddn.com/tmp.mp4");
+                playerBean.setPlayerUrls(uris);
+                ArrayList<String> linsNames = new ArrayList<>();
+                linsNames.add("超清");
+                linsNames.add("高清");
+                linsNames.add("标清");
                 playerBean.setLineNames(linsNames);
             }
             if (i == 1) {
                 playerBean.setTitle("烟火里的尘埃");
                 playerBean.setInfo("不是华晨宇唱的烟火里的尘埃");
-                ArrayList<Uri> uris = new ArrayList<>();
-                uris.add(Uri.parse("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_t3QJVZ.mp4"));
-                uris.add(Uri.parse("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_t3QJVZ.mp4"));
-                uris.add(Uri.parse("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_t3QJVZ.mp4"));
-                playerBean.setUris(uris);
-                ArrayList<Integer> linsNames = new ArrayList<>();
-                linsNames.add(1080);
-                linsNames.add(720);
-                linsNames.add(560);
+                ArrayList<String> uris = new ArrayList<>();
+                uris.add("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_t3QJVZ.mp4");
+                uris.add("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_t3QJVZ.mp4");
+                uris.add("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_t3QJVZ.mp4");
+                playerBean.setPlayerUrls(uris);
+                ArrayList<String> linsNames = new ArrayList<>();
+                linsNames.add("超清");
+                linsNames.add("高清");
+                linsNames.add("标清");
                 playerBean.setLineNames(linsNames);
             }
             if (i == 2) {
                 playerBean.setTitle("螳螂拳");
                 playerBean.setInfo("热血像那红日光");
-                ArrayList<Uri> uris = new ArrayList<>();
-                uris.add(Uri.parse("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_5Vkbz0.mp4"));
-                uris.add(Uri.parse("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_5Vkbz0.mp4"));
-                uris.add(Uri.parse("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_5Vkbz0.mp4"));
-                playerBean.setUris(uris);
-                ArrayList<Integer> linsNames = new ArrayList<>();
-                linsNames.add(1080);
-                linsNames.add(720);
-                linsNames.add(560);
+                ArrayList<String> uris = new ArrayList<>();
+                uris.add("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_5Vkbz0.mp4");
+                uris.add("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_5Vkbz0.mp4");
+                uris.add("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_5Vkbz0.mp4");
+                playerBean.setPlayerUrls(uris);
+                ArrayList<String> linsNames = new ArrayList<>();
+                linsNames.add("超清");
+                linsNames.add("高清");
+                linsNames.add("标清");
                 playerBean.setLineNames(linsNames);
             }
             if (i == 3) {
                 playerBean.setTitle("六一儿童节快乐");
                 playerBean.setInfo("六一儿童节快乐");
-                ArrayList<Uri> uris = new ArrayList<>();
-                uris.add(Uri.parse("http://mp4.vjshi.com/2015-05-11/1431320221859_786.mp4"));
-                uris.add(Uri.parse("http://mp4.vjshi.com/2016-10-21/84bafe60ef0af95a5292f66b9f692504.mp4"));
-                uris.add(Uri.parse("http://mp4.vjshi.com/2017-04-14/933db6540f53dd38974b4446388fb928.mp4"));
-                playerBean.setUris(uris);
-                ArrayList<Integer> linsNames = new ArrayList<>();
-                linsNames.add(1080);
-                linsNames.add(720);
-                linsNames.add(560);
+                ArrayList<String> uris = new ArrayList<>();
+                uris.add("http://mp4.vjshi.com/2015-05-11/1431320221859_786.mp4");
+                uris.add("http://mp4.vjshi.com/2016-10-21/84bafe60ef0af95a5292f66b9f692504.mp4");
+                uris.add("http://mp4.vjshi.com/2017-04-14/933db6540f53dd38974b4446388fb928.mp4");
+                playerBean.setPlayerUrls(uris);
+                ArrayList<String> linsNames = new ArrayList<>();
+                linsNames.add("超清");
+                linsNames.add("高清");
+                linsNames.add("标清");
                 playerBean.setLineNames(linsNames);
             }
             playerBeans.add(playerBean);

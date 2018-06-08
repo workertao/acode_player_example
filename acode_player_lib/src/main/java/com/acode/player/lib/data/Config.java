@@ -14,10 +14,10 @@ public class Config {
     //更新当前时间和进度条
     public static final int UPDATE_CURRNET_UI = 1000;
     //超清
-    public static final int SUPER_CLEAR = 1080;
+    public static final String SUPER_CLEAR = "超清";
     //高清
-    public static final int HIGHT_CLEAR = 720;
+    public static final String HIGHT_CLEAR = "高清";
     //标清
-    public static final int STARTMD_CLEAR = 560;
+    public static final String STARTMD_CLEAR = "标清";
 
 }

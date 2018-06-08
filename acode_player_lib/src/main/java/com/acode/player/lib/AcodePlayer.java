@@ -181,7 +181,7 @@ public class AcodePlayer implements AcodePlayerStateListener, View.OnTouchListen
      * @param playerBean 播放数据源
      *                   设置播放线路
      */
-    public void readyPlayer(PlayerBean playerBean, int lins) {
+    public void readyPlayer(PlayerBean playerBean, String lins) {
         this.playerBean = playerBean;
         if (timerUtils != null) {
             timerUtils.stop();
@@ -190,9 +190,9 @@ public class AcodePlayer implements AcodePlayerStateListener, View.OnTouchListen
         //创建定时间监听播放状态
         timerUtils = new TimerUtils(this, player, playerBean);
         Uri uri = null;
-        for (int i = 0; i < playerBean.getUris().size(); i++) {
-            if (lins == playerBean.getLineNames().get(i)) {
-                uri = playerBean.getUris().get(i);
+        for (int i = 0; i < playerBean.getPlayerUrls().size(); i++) {
+            if (lins.equals(playerBean.getLineNames().get(i))) {
+                uri = Uri.parse(playerBean.getPlayerUrls().get(i));
             }
         }
         //初始化数据源

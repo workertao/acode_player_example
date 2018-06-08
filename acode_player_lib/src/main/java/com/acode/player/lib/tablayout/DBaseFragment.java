@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.acode.player.R;
+import com.acode.player.lib.utils.Dlog;
 
 /**
  * user:yangtao
@@ -26,6 +27,7 @@ public abstract class DBaseFragment extends Fragment {
     //初始化data
     public abstract void initData();
 
+
     public View centerView;
 
     private FrameLayout base_fl_fram_title;
@@ -39,6 +41,7 @@ public abstract class DBaseFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Dlog.i(DBaseFragment.class,"onCreateView---------");
         centerView = LayoutInflater.from(getContext()).inflate(R.layout.base_fragment_res, null);
         base_fl_fram_title = (FrameLayout) centerView.findViewById(R.id.base_fl_fram_title);
         base_fl_fram_center = (FrameLayout) centerView.findViewById(R.id.base_fl_fram_center);

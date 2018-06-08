@@ -7,6 +7,7 @@ import android.support.v4.view.ViewPager;
 import android.view.View;
 
 import com.acode.player.R;
+import com.acode.player.lib.utils.NoScrollViewPager;
 
 import net.lucode.hackware.magicindicator.MagicIndicator;
 import net.lucode.hackware.magicindicator.buildins.commonnavigator.CommonNavigator;
@@ -28,7 +29,7 @@ public abstract class DTBaseFragment extends DBaseFragment implements ViewPager.
     //tab
     private MagicIndicator magiIndicator;
     //vp
-    private ViewPager mViewPager;
+    private NoScrollViewPager mViewPager;
     //tab跳转器
     private CommonNavigator commonNavigator;
 
@@ -49,8 +50,8 @@ public abstract class DTBaseFragment extends DBaseFragment implements ViewPager.
 
     @Override
     public void initView() {
-        magiIndicator = (MagicIndicator) centerView.findViewById(R.id.mid_gf_tab);
-        mViewPager = (ViewPager) centerView.findViewById(R.id.vp_gf_list);
+        magiIndicator = centerView.findViewById(R.id.mid_gf_tab);
+        mViewPager =  centerView.findViewById(R.id.vp_gf_list);
         mViewPager.addOnPageChangeListener(this);
     }
 
@@ -127,5 +128,17 @@ public abstract class DTBaseFragment extends DBaseFragment implements ViewPager.
     public void setVpPosition(int position) {
         mViewPager.setCurrentItem(position);
         isOnResumeRefresh = true;
+    }
+    //设置viewpager是否可以滑动
+    public void setVpScroll(boolean isScroll){
+        mViewPager.setScroll(isScroll);
+    }
+    //设置MagiIndicator是否可见
+    public void setMagiIndicatorVis(boolean isVis){
+        if (isVis){
+            magiIndicator.setVisibility(View.VISIBLE);
+            return;
+        }
+        magiIndicator.setVisibility(View.GONE);
     }
 }

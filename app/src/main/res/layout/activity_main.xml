@@ -1,48 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clipToPadding="true"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical"
-    tools:context="com.acode.player.MainActivity">
+    android:orientation="vertical">
 
-    <com.acode.player.lib.AcodePlayerView
-        android:id="@+id/acodePlayerView"
+    <TextView
+        android:id="@+id/tv"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="30dp"
+        android:background="#ff4"
+        android:gravity="center"
+        android:text="请同意申请权限~~！"
+        android:textColor="#f65" />
 
-    </com.acode.player.lib.AcodePlayerView>
+    <Button
+        android:id="@+id/btn1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="单个播放器" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <Button
-                android:id="@+id/btn_intent"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text="测试跳转" />
-
-            <Button
-                android:id="@+id/btn"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text="获取视频列表" />
-
-            <LinearLayout
-                android:id="@+id/ll_video_files_root"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-            </LinearLayout>
-        </LinearLayout>
-    </ScrollView>
+    <Button
+        android:id="@+id/btn2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="列表播放器" />
 </LinearLayout>

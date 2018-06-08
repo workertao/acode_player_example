@@ -1,6 +1,10 @@
-package com.acode.player.lib.tablayout;
+package com.acode.player.listplayer;
 
 import android.support.v4.view.PagerAdapter;
+import android.view.KeyEvent;
+
+import com.acode.player.lib.tablayout.DTBaseFragment;
+import com.acode.player.lib.tablayout.Tab;
 
 import java.util.ArrayList;
 
@@ -11,6 +15,8 @@ import java.util.ArrayList;
  * introduce:功能
  */
 public class CircleFragment extends DTBaseFragment {
+    private TabAdapter tabAdapter;
+    private int currentPosition;
 
     @Override
     public void initData() {
@@ -20,7 +26,7 @@ public class CircleFragment extends DTBaseFragment {
 
     @Override
     public PagerAdapter setTabAdapter() {
-        TabAdapter tabAdapter = new TabAdapter(getChildFragmentManager());
+        tabAdapter = new TabAdapter(getChildFragmentManager());
         tabAdapter.setDatas(getData());
         return tabAdapter;
     }
@@ -28,6 +34,7 @@ public class CircleFragment extends DTBaseFragment {
     @Override
     public void getChannel(int position) {
         //当前频道
+        this.currentPosition = position;
     }
 
     @Override
@@ -45,5 +52,13 @@ public class CircleFragment extends DTBaseFragment {
             tabs.add(tab);
         }
         return tabs;
+    }
+
+    public void setVpScroll(boolean isScroll) {
+        super.setVpScroll(isScroll);
+    }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        return ((ListPlayerFragment) tabAdapter.getItem(currentPosition)).onKeyDown(keyCode, event);
     }
 }

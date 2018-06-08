@@ -30,7 +30,10 @@ import com.acode.player.R;
 import com.acode.player.lib.anim.AnimUtils;
 import com.acode.player.lib.bean.PlayerBean;
 import com.acode.player.lib.data.Config;
+import com.acode.player.lib.listener.AcodePlayerBackListener;
 import com.acode.player.lib.listener.AcodePlayerListener;
+import com.acode.player.lib.listener.AcodePlayerOrientationListener;
+import com.acode.player.lib.listener.AcodePlayerStateListener;
 import com.acode.player.lib.utils.DimenUtils;
 import com.acode.player.lib.utils.GestureEnum;
 import com.acode.player.lib.utils.NetUtils;
@@ -103,18 +106,29 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     private TextView tv_hight_clear;
     //标清
     private TextView tv_standard_clear;
+    //播放进度更新
+    private AcodePlayerStateListener acodePlayerStateListener;
 
+    public PlayerBean getPlayerBean() {
+        return playerBean;
+    }
+
+    public AcodePlayerView setPlayerBean(PlayerBean playerBean) {
+        this.playerBean = playerBean;
+        return this;
+    }
+
+    public AcodePlayerView setAcodePlayerStateListener(AcodePlayerStateListener acodePlayerStateListener) {
+        this.acodePlayerStateListener = acodePlayerStateListener;
+        return this;
+    }
 
     public AcodePlayerView(@NonNull Context context) {
-        super(context);
-        this.context = context;
-        initView();
+        this(context, null);
     }
 
     public AcodePlayerView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        this.context = context;
-        initView();
+        this(context, attrs, 0);
     }
 
     public AcodePlayerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
@@ -125,13 +139,12 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
 
     @SuppressLint("WrongViewCast")
     private void initView() {
-        view = LayoutInflater.from(context).inflate(R.layout.acode_player_view, null);
+        view = LayoutInflater.from(context).inflate(R.layout.acode_player_view, this);
         initNet();
         initPlayerView();
         initSystemSetView();
         initPlayerProgressView();
         initNetworkView();
-        this.addView(view);
         initListener();
         initData();
     }
@@ -243,6 +256,9 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
             @Override
             public void onPlayering(PlayerBean pb) {
                 Log.d("post", "播放中");
+                if (acodePlayerStateListener!=null){
+                    acodePlayerStateListener.playerRuning(pb);
+                }
                 playerBean = pb;
                 handler.sendEmptyMessage(Config.UPDATE_CURRNET_UI);
             }
@@ -331,14 +347,15 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
         //设置标题
         tv_title.setText(playerBean.getInfo());
     }
+
     /**
      * 准备播放
      *
      * @param playerBean 播放的实体
      *                   设置播放路线
      */
-    public void readyPlayer(PlayerBean playerBean,int line) {
-        player.readyPlayer(playerBean,line);
+    public void readyPlayer(PlayerBean playerBean, String line) {
+        player.readyPlayer(playerBean, line);
         this.playerBean = playerBean;
         //设置标题
         tv_title.setText(playerBean.getInfo());
@@ -506,6 +523,7 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
                 ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 return;
             }
+            ((Activity) context).finish();
 
         } else if (i == R.id.rl_controller_view) {
             //整个播放器的控制层view
@@ -522,13 +540,13 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
             rl_controller_view.setVisibility(VISIBLE);
         } else if (i == R.id.tv_super_clear) {
             pausePlayer();
-            readyPlayer(playerBean,Config.SUPER_CLEAR);
+            readyPlayer(playerBean, Config.SUPER_CLEAR);
         } else if (i == R.id.tv_hight_clear) {
             pausePlayer();
-            readyPlayer(playerBean,Config.HIGHT_CLEAR);
+            readyPlayer(playerBean, Config.HIGHT_CLEAR);
         } else if (i == R.id.tv_standard_clear) {
             pausePlayer();
-            readyPlayer(playerBean,Config.STARTMD_CLEAR);
+            readyPlayer(playerBean, Config.STARTMD_CLEAR);
         }
     }
 
@@ -551,7 +569,7 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
     //竖屏播放
     private void screenVertical() {
         ((Activity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN); //显示状态栏
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.height = DimenUtils.dip2px(context, 300);
         rl_player_view.setLayoutParams(params);
     }
@@ -564,6 +582,7 @@ public class AcodePlayerView extends FrameLayout implements View.OnClickListener
                 ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 return true;
             }
+            ((Activity) context).finish();
         }
         return false;
     }

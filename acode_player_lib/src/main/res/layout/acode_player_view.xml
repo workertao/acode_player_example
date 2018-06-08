@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <FrameLayout
         android:id="@+id/rl_player_view"
@@ -11,7 +11,8 @@
         <SurfaceView
             android:id="@+id/sv_player"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:background="#00000000" />
 
         <RelativeLayout
             android:id="@+id/rl_controller_view"
@@ -99,7 +100,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:gravity="center"
-                    android:text="0"
+                    android:text="00:00"
                     android:textColor="#fff" />
 
                 <SeekBar
@@ -128,7 +129,7 @@
                     android:layout_centerVertical="true"
                     android:layout_toLeftOf="@+id/btn_bottom_full_screen"
                     android:gravity="center"
-                    android:text="0"
+                    android:text="00:00"
                     android:textColor="#fff" />
 
                 <ImageView

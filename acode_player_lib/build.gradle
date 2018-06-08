@@ -36,4 +36,5 @@ dependencies {
     compile 'com.google.android.exoplayer:exoplayer:2.7.3'
     //tablayout
     compile 'com.github.hackware1993:MagicIndicator:1.5.0'
+    compile 'com.android.support:recyclerview-v7:26.1.0'
 }

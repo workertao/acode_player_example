@@ -1,9 +1,11 @@
-package com.acode.player.lib.tablayout;
+package com.acode.player.listplayer;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+
+import com.acode.player.lib.tablayout.Tab;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,7 @@ public class TabAdapter extends FragmentStatePagerAdapter {
 
     private List<Tab> datas;
 
-    private List<TestFragment> testFragments;
+    private List<ListPlayerFragment> testFragments;
 
     public void setDatas(List<Tab> datas) {
         this.datas = datas;
@@ -28,7 +30,7 @@ public class TabAdapter extends FragmentStatePagerAdapter {
         }
         testFragments = new ArrayList<>();
         for (int i = 0; i < datas.size(); i++) {
-            TestFragment fragment = new TestFragment();
+            ListPlayerFragment fragment = new ListPlayerFragment();
             Bundle bundle = new Bundle();
             bundle.putSerializable("tab", datas.get(i));
             fragment.setArguments(bundle);

@@ -1,9 +1,8 @@
 package com.acode.player.lib.bean;
 
-import android.net.Uri;
-
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Observable;
 
 /**
  * user:yangtao
@@ -11,12 +10,12 @@ import java.util.ArrayList;
  * email:yangtao@bjxmail.com
  * introduce:视频实体
  */
-public class PlayerBean implements Serializable {
+public class PlayerBean extends Observable implements Serializable {
     //视频的uri集合
-    private ArrayList<Uri> uris;
+    private ArrayList<String> playerUrls;
 
     //线路集合
-    private ArrayList<Integer> lineNames;
+    private ArrayList<String> lineNames;
 
     //视频名称
     private String title;
@@ -46,11 +45,14 @@ public class PlayerBean implements Serializable {
     //当前视频的缓冲进度
     private int bufferedPercentage;
 
+    public PlayerBean() {
+    }
+
     @Override
     public String toString() {
         return "PlayerBean{" +
                 ", title='" + title + '\'' +
-                ", uris='" + uris.toString() + '\'' +
+                ", playerUrls='" + playerUrls.toString() + '\'' +
                 ", lineNames='" + lineNames.toString() + '\'' +
                 ", info='" + info + '\'' +
                 ", imgUrl='" + imgUrl + '\'' +
@@ -64,22 +66,21 @@ public class PlayerBean implements Serializable {
                 '}';
     }
 
-
-    public ArrayList<Integer> getLineNames() {
+    public ArrayList<String> getLineNames() {
         return lineNames;
     }
 
-    public PlayerBean setLineNames(ArrayList<Integer> lineNames) {
+    public PlayerBean setLineNames(ArrayList<String> lineNames) {
         this.lineNames = lineNames;
         return this;
     }
 
-    public ArrayList<Uri> getUris() {
-        return uris;
+    public ArrayList<String> getPlayerUrls() {
+        return playerUrls;
     }
 
-    public PlayerBean setUris(ArrayList<Uri> uris) {
-        this.uris = uris;
+    public PlayerBean setPlayerUrls(ArrayList<String> playerUrls) {
+        this.playerUrls = playerUrls;
         return this;
     }
 
