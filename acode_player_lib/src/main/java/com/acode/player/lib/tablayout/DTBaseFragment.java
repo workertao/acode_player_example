@@ -6,7 +6,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 
-import com.acode.player.R;
+import com.acode.player.lib.R;
 import com.acode.player.lib.utils.NoScrollViewPager;
 
 import net.lucode.hackware.magicindicator.MagicIndicator;

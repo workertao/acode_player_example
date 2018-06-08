@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.acode.player.R;
+import com.acode.player.lib.R;
 import com.acode.player.lib.utils.Dlog;
 
 /**

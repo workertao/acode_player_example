@@ -26,10 +26,6 @@ allprojects {
     }
 }
 
-ext {
-    exoPlayerVersion = "2.7.3"
-}
-
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
