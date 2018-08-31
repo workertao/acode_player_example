@@ -35,6 +35,7 @@ public class Data {
                 linsNames.add("高清");
                 linsNames.add("标清");
                 playerBean.setLineNames(linsNames);
+                playerBean.setMs(100000+System.currentTimeMillis());
             }
             if (i == 1) {
                 playerBean.setTitle("烟火里的尘埃");

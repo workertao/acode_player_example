@@ -45,7 +45,18 @@ public class PlayerBean extends Observable implements Serializable {
     //当前视频的缓冲进度
     private int bufferedPercentage;
 
+    private long ms;
+
     public PlayerBean() {
+    }
+
+    public long getMs() {
+        return ms;
+    }
+
+    public PlayerBean setMs(long ms) {
+        this.ms = ms;
+        return this;
     }
 
     @Override

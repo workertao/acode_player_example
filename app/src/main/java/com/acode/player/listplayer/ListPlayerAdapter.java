@@ -19,6 +19,8 @@ import com.acode.player.lib.utils.Dlog;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.iwgang.countdownview.CountdownView;
+
 /**
  * user:yangtao
  * date:2018/6/61739
@@ -65,9 +67,15 @@ public class ListPlayerAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         if (holder instanceof TestViewHolder) {
             final TestViewHolder testViewHolder = (TestViewHolder) holder;
+            testViewHolder.bindData(playerBeans.get(position));
             testViewHolder.iv.setVisibility(View.VISIBLE);
             testViewHolder.ll.setVisibility(View.INVISIBLE);
             testViewHolder.iv.setImageResource(R.mipmap.ic_launcher);
+            if (playerBeans.get(position).getMs() > 0) {
+                testViewHolder.cv.setVisibility(View.VISIBLE);
+            } else {
+                testViewHolder.cv.setVisibility(View.GONE);
+            }
             testViewHolder.iv.setOnClickListener(new View.OnClickListener() {
                 @SuppressLint("ResourceType")
                 @Override
@@ -103,6 +111,22 @@ public class ListPlayerAdapter extends RecyclerView.Adapter {
     }
 
     @Override
+    public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
+        int pos = holder.getAdapterPosition();
+//            Log.d("MyViewHolder", String.format("mCvCountdownView %s is attachedToWindow", pos));
+
+        PlayerBean itemInfo = playerBeans.get(pos);
+
+        ((TestViewHolder) holder).refreshTime(itemInfo.getMs() - System.currentTimeMillis());
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(RecyclerView.ViewHolder holder) {
+        ((TestViewHolder) holder).getCvCountdownView().stop();
+    }
+
+
+    @Override
     public int getItemCount() {
         return playerBeans.size();
     }
@@ -110,11 +134,32 @@ public class ListPlayerAdapter extends RecyclerView.Adapter {
     public class TestViewHolder extends RecyclerView.ViewHolder {
         ImageView iv;
         LinearLayout ll;
+        CountdownView cv;
+        PlayerBean mItemInfo;
 
         public TestViewHolder(ViewGroup parent) {
             super(LayoutInflater.from(parent.getContext()).inflate(R.layout.rv_item, parent, false));
             iv = itemView.findViewById(R.id.iv);
             ll = itemView.findViewById(R.id.ll);
+            cv = itemView.findViewById(R.id.cv);
+        }
+
+        public void bindData(PlayerBean itemInfo) {
+            mItemInfo = itemInfo;
+            refreshTime(mItemInfo.getMs() - System.currentTimeMillis());
+        }
+
+        public CountdownView getCvCountdownView() {
+            return cv;
+        }
+
+        public void refreshTime(long leftTime) {
+            if (leftTime > 0) {
+                cv.start(leftTime);
+            } else {
+                cv.stop();
+                cv.allShowZero();
+            }
         }
     }
 

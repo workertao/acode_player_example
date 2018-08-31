@@ -1,6 +1,6 @@
 #  基于exoplayer的自定义播放器 #
 ## 效果图##
-![效果图](https://github.com/workertao/acode_player_example/tree/master/images/player.gif)
+![效果图](http://ohdryj9ow.bkt.clouddn.com/player.gif)
 (如果查看不了，请点击文字跳转网页查看)
 
 ## 使用方法 ##

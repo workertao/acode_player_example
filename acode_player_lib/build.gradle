@@ -29,4 +29,6 @@ dependencies {
     //tablayout
     compile 'com.github.hackware1993:MagicIndicator:1.5.0'
     compile 'com.android.support:recyclerview-v7:26.1.0'
+    //倒计时
+    compile 'com.github.iwgang:countdownview:2.1.6'
 }
