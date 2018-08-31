@@ -1,7 +1,8 @@
 #  基于exoplayer的自定义播放器 #
 ## 效果图##
 ![效果图](http://ohdryj9ow.bkt.clouddn.com/player.gif)
-(如果查看不了，请点击文字跳转网页查看)
+
+[http://ohdryj9ow.bkt.clouddn.com/player.gif](http://ohdryj9ow.bkt.clouddn.com/player.gif "查看不了，请点击")
 
 ## 使用方法 ##
 1.在需要播放视频的页面的xml布局添加以下控件
