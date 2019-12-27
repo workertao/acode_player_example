@@ -23,12 +23,12 @@ public class Data {
             playerBean.setEndTime("00:00");
             playerBean.setUploadProgress(0);
             if (i == 0) {
-                playerBean.setTitle("小神龙");
-                playerBean.setInfo("小神龙谈父亲");
+                playerBean.setTitle("mp4");
+                playerBean.setInfo("mp4");
                 ArrayList<String> uris = new ArrayList<>();
-                uris.add("http://oif1jvh5f.bkt.clouddn.com/tmp.mp4");
-                uris.add("http://oif1jvh5f.bkt.clouddn.com/tmp.mp4");
-                uris.add("http://oif1jvh5f.bkt.clouddn.com/tmp.mp4");
+                uris.add("http://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4");
+                uris.add("http://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4");
+                uris.add("http://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4");
                 playerBean.setPlayerUrls(uris);
                 ArrayList<String> linsNames = new ArrayList<>();
                 linsNames.add("超清");
@@ -38,12 +38,12 @@ public class Data {
                 playerBean.setMs(100000+System.currentTimeMillis());
             }
             if (i == 1) {
-                playerBean.setTitle("烟火里的尘埃");
-                playerBean.setInfo("不是华晨宇唱的烟火里的尘埃");
+                playerBean.setTitle("m3u8暂不支持");
+                playerBean.setInfo("m3u8暂不支持");
                 ArrayList<String> uris = new ArrayList<>();
-                uris.add("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_t3QJVZ.mp4");
-                uris.add("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_t3QJVZ.mp4");
-                uris.add("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_t3QJVZ.mp4");
+                uris.add("http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8");
+                uris.add("http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8");
+                uris.add("http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8");
                 playerBean.setPlayerUrls(uris);
                 ArrayList<String> linsNames = new ArrayList<>();
                 linsNames.add("超清");
@@ -52,12 +52,12 @@ public class Data {
                 playerBean.setLineNames(linsNames);
             }
             if (i == 2) {
-                playerBean.setTitle("螳螂拳");
-                playerBean.setInfo("热血像那红日光");
+                playerBean.setTitle("rtmp暂不支持");
+                playerBean.setInfo("rtmp暂不支持");
                 ArrayList<String> uris = new ArrayList<>();
-                uris.add("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_5Vkbz0.mp4");
-                uris.add("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_5Vkbz0.mp4");
-                uris.add("http://oif1jvh5f.bkt.clouddn.com/CFNetworkDownload_5Vkbz0.mp4");
+                uris.add("rtmp://media3.sinovision.net:1935/live/livestream");
+                uris.add("rtmp://media3.sinovision.net:1935/live/livestream");
+                uris.add("rtmp://media3.sinovision.net:1935/live/livestream");
                 playerBean.setPlayerUrls(uris);
                 ArrayList<String> linsNames = new ArrayList<>();
                 linsNames.add("超清");
